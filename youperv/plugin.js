@@ -39,8 +39,15 @@
             const baseUrl = manifest.baseUrl || "https://youperv.com";
             const categories = {
                 "Home": baseUrl,
-                "Most Viewed": `${baseUrl}/top-50-most-viewed-videos.html`,
-                "Top Rated": `${baseUrl}/top-porn-videos.html`
+                "Most Viewed": `${https://youperv.com/top-50-most-viewed-videos.html'.
+                "Top Rated": `${https://youperv.com}/top-porn-videos.html', 
+            "Anal": `${https://youperv.com}/tags/anal/`,
+            "Amateur": `${baseUrl}/tags/amateur/`,
+            "Big Tits": `${baseUrl}/tags/big-tits/`,
+            "Lesbian": `${baseUrl}/tags/lesbian/`,
+            "POV": `${baseUrl}/tags/pov/`,
+            "Threesome": `${baseUrl}/tags/threesome/`,
+            "Young Girl": `${baseUrl}/tags/young-girl/`
             };
             
             const data = {};
