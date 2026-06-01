@@ -7,32 +7,23 @@
     };
 
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
-    function parseVideoItems(html) {
-        const items = [];
-        const itemPattern = /<div class="item"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="item-link"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
-        
-        let match;
-        while ((match = itemPattern.exec(html)) !== null) {
-            const href = match[1];
-            const posterSrc = match[2];
-            const altText = match[3];
-            
-            const title = altText.split('(')[0].trim();
-            const fullUrl = href.startsWith('http') ? href : (manifest.baseUrl || "https://xmoviesforyou.com/") + href;
-            const posterUrl = posterSrc.startsWith('http') ? posterSrc : (manifest.baseUrl || "https://xmoviesforyou.com/") + posterSrc;
-            
-            if (title && href) {
-                items.push(new MultimediaItem({
-                    title: title,
-                    url: fullUrl,
-                    posterUrl: posterUrl,
-                    type: "movie",
-                    isAdult: true
-                }));
-            }
-        }
-        return items;
+function parseVideoItems(html) {
+    const items = [];
+    // Hum .flex-none class wale anchor tags ko target kar rahe hain
+    const itemPattern = /<a[^>]*href="([^"]+)"[^>]*class="flex-none[^>]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"/gi;
+
+    let match;
+    while ((match = itemPattern.exec(html)) !== null) {
+        items.push({
+            link: match[1],
+            image: match[2],
+            title: match[3]
+        });
     }
+    return items;
+}
+
+    
 
     async function getHome(cb) {
         try {
