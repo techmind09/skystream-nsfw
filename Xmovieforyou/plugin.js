@@ -7,9 +7,9 @@
     };
 
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
-function parseVideoItems(html) {
+
+    function parseVideoItems(html) {
     const items = [];
-    // Hum .flex-none class wale anchor tags ko target kar rahe hain
     const itemPattern = /<a[^>]*href="([^"]+)"[^>]*class="flex-none[^>]*"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"/gi;
 
     let match;
@@ -22,6 +22,7 @@ function parseVideoItems(html) {
     }
     return items;
 }
+
 
     
 
