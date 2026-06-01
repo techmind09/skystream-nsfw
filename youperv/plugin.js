@@ -38,10 +38,10 @@
         try {
             const baseUrl = manifest.baseUrl || "https://youperv.com";
             const categories = {
-                "Home": baseUrl,
-                "Most Viewed": `${https://youperv.com/top-50-most-viewed-videos.html'.
-                "Top Rated": `${https://youperv.com}/top-porn-videos.html', 
-            "Anal": `${https://youperv.com}/tags/anal/`,
+                 "Home": baseUrl,
+            "Most Viewed": `${baseUrl}/most-viewed/`,
+            "Top Rated": `${baseUrl}/top-rated/`,
+            "Anal": `${baseUrl}/tags/anal/`,
             "Amateur": `${baseUrl}/tags/amateur/`,
             "Big Tits": `${baseUrl}/tags/big-tits/`,
             "Lesbian": `${baseUrl}/tags/lesbian/`,
