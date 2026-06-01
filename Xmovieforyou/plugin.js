@@ -1,6 +1,6 @@
 (function () {
     const HEADERS = {
-        "User-Agent : Mozilla/5.0 (Linux; Android 15; Infinix X6851 Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/148.0.7778.178 Mobile Safari/537.36",
+        "User-Agent : "Mozilla/5.0 (Linux; Android 15; Infinix X6851 Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/148.0.7778.178 Mobile Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://xmoviesforyou.com/"
@@ -30,9 +30,9 @@
         try {
             const baseUrl = manifest.baseUrl || "https://xmoviesforyou.com/";
             const categories = {
-                "Home": baseUrl,
-                "Most Viewed": `${baseUrl}/top-50-most-viewed-videos.html`,
-                "Top Rated": `${baseUrl}/top-porn-videos.html`
+                "Home":https://xmoviesforyou.com/,
+                "Most Viewed": `${https://xmoviesforyou.com/most-viewed}/top-50-most-viewed-videos.html`,
+                "latest Rated": `${https://xmoviesforyou.com/}/latest-porn-videos.html`
             };
             
             const data = {};
