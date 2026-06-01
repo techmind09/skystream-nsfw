@@ -190,14 +190,14 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
             const html = res.body || "";
-            const iframeMatch = html.match(/<iframe[^>]*src="([^"]+)"[^>]*>/i);
-            
+            const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+            console.log("HTML Body Preview:", html.substring(0, 500));
             if (!iframeMatch) return cb({ success: false, errorCode: "NO_STREAMS" });
 
-            const videoHostUrl = iframeMatch[1];
-            let streams = [];
+            let cleanUrl = videoHostUrl;
+if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
 
-            try {
+try {
                 if (videoHostUrl.includes('mixdrop')) {
                     streams = await new MixDrop().getUrl(videoHostUrl);
                 } else if (videoHostUrl.includes('streamtape')) {
@@ -210,6 +210,7 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             } catch (e) {
                 console.error("Extractor error: ", e);
             }
+            
 
             if (streams && streams.length > 0) {
                 const results = streams.map(s => new StreamResult({
