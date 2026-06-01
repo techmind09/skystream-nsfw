@@ -1,0 +1,11 @@
+{
+  "packageName": "com.skystream-nsfw.xmoviesforyou",
+  "name": "Xmovieforyou",
+  "version": 1,
+  "baseUrl": "https://xmoviesforyou.com/",
+  "description": "Xmoviesforyou Site for 18+",
+  "isAdult": true,
+  "authors": ["teachmind09"],
+  "languages": ["en"],
+  "categories": ["Adult"]
+}
