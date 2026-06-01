@@ -228,7 +228,7 @@ try {
         }
     }
 
-    // 3. Global exposure (Ye bahut zaroori hai)
+
     globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
