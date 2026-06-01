@@ -24,9 +24,38 @@
         try {
             const baseUrl = "https://xmoviesforyou.com/";
             const categories = {
-                "Home": baseUrl,
-                "Most Viewed": "https://xmoviesforyou.com/most-viewed",
-                "Latest": "https://xmoviesforyou.com/latest"
+                  "Home": baseUrl,
+            "Most Viewed 30 Day": `${baseUrl}/most-viewed/`,
+            "Top Rated 30 Day": `${baseUrl}/top-rated/`,
+            "Brunette": `${baseUrl}/tags/brunette/`,
+            "Blonde": `${baseUrl}/tags/blonde/`,
+            "Teen": `${baseUrl}/tags/teen/`,
+            "MILF": `${baseUrl}/tags/milf/`,
+            "Threesome": `${baseUrl}/tags/threesome/`,
+            "Interracial": `${baseUrl}/tags/interracial/`,
+            "Redhead": `${baseUrl}/tags/redhead/`,
+            "Anal": `${baseUrl}/tags/anal/`,
+            "Lesbian": `${baseUrl}/tags/lesbian/`,
+            "Asian": `${baseUrl}/tags/asian/`,
+            "Latina": `${baseUrl}/tags/latina/`,
+            "Tattoo": `${baseUrl}/tags/tattoo/`,
+            "Orgy": `${baseUrl}/tags/orgy/`,
+            "BangBros": `${baseUrl}/tags/bangbros/`,
+            "NaughtyAmerica": `${baseUrl}/tags/naughtyamerica/`,
+            "Ebony": `${baseUrl}/tags/ebony/`,
+            "TeamSkeet": `${baseUrl}/tags/teamskeet/`,
+            "Brazzers": `${baseUrl}/tags/brazzers/`,
+            "Gangbang": `${baseUrl}/tags/gangbang/`,
+            "BDSM": `${baseUrl}/tags/bdsm/`,
+            "RealityKings": `${baseUrl}/tags/realitykings/`,
+            "21Sextury": `${baseUrl}/tags/21sextury/`,
+            "Squirt": `${baseUrl}/tags/squirt/`,
+            "Mofos": `${baseUrl}/tags/mofos/`,
+            "Hardcore": `${baseUrl}/tags/hardcore/`,
+            "Masturbation": `${baseUrl}/tags/masturbation/`,
+            "Kinky": `${baseUrl}/tags/kinky/`,
+            "PornPros": `${baseUrl}/tags/pornpros/`,
+            "Spizoo": `${baseUrl}/tags/spizoo/`
             };
             
             const data = {};
