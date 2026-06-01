@@ -183,21 +183,25 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
-
+    
     async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
             const html = res.body || "";
+            // Iframe extract karein
             const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-            console.log("HTML Body Preview:", html.substring(0, 500));
+            
             if (!iframeMatch) return cb({ success: false, errorCode: "NO_STREAMS" });
 
-            let cleanUrl = videoHostUrl;
-if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
+            // Sahi variable ka use karein (cleanUrl)
+            let videoHostUrl = iframeMatch[1];
+            if (videoHostUrl.startsWith('//')) videoHostUrl = 'https:' + videoHostUrl;
 
-try {
+            let streams = [];
+            try {
+                // Ab 'videoHostUrl' variable defined hai aur sahi URL contain karta hai
                 if (videoHostUrl.includes('mixdrop')) {
                     streams = await new MixDrop().getUrl(videoHostUrl);
                 } else if (videoHostUrl.includes('streamtape')) {
@@ -211,7 +215,6 @@ try {
                 console.error("Extractor error: ", e);
             }
             
-
             if (streams && streams.length > 0) {
                 const results = streams.map(s => new StreamResult({
                     url: s.url,
@@ -227,6 +230,9 @@ try {
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
+
+
+    u
 
 
     globalThis.getHome = getHome;
