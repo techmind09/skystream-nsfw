@@ -38,39 +38,27 @@
         try {
             const baseUrl = manifest.baseUrl || "https://tube.perverzija.com/";
             const categories = {
-                  "Home": baseUrl,
-            "Most Viewed 30 Day": `${baseUrl}/most-viewed/`,
-            "Top Rated 30 Day": `${baseUrl}/top-rated/`,
-            "Brunette": `${baseUrl}/tags/brunette/`,
-            "Blonde": `${baseUrl}/tags/blonde/`,
-            "Teen": `${baseUrl}/tags/teen/`,
-            "MILF": `${baseUrl}/tags/milf/`,
-            "Threesome": `${baseUrl}/tags/threesome/`,
-            "Interracial": `${baseUrl}/tags/interracial/`,
-            "Redhead": `${baseUrl}/tags/redhead/`,
-            "Anal": `${baseUrl}/tags/anal/`,
-            "Lesbian": `${baseUrl}/tags/lesbian/`,
-            "Asian": `${baseUrl}/tags/asian/`,
-            "Latina": `${baseUrl}/tags/latina/`,
-            "Tattoo": `${baseUrl}/tags/tattoo/`,
-            "Orgy": `${baseUrl}/tags/orgy/`,
-            "BangBros": `${baseUrl}/tags/bangbros/`,
-            "NaughtyAmerica": `${baseUrl}/tags/naughtyamerica/`,
-            "Ebony": `${baseUrl}/tags/ebony/`,
-            "TeamSkeet": `${baseUrl}/tags/teamskeet/`,
-            "Brazzers": `${baseUrl}/tags/brazzers/`,
-            "Gangbang": `${baseUrl}/tags/gangbang/`,
-            "BDSM": `${baseUrl}/tags/bdsm/`,
-            "RealityKings": `${baseUrl}/tags/realitykings/`,
-            "21Sextury": `${baseUrl}/tags/21sextury/`,
-            "Squirt": `${baseUrl}/tags/squirt/`,
-            "Mofos": `${baseUrl}/tags/mofos/`,
-            "Hardcore": `${baseUrl}/tags/hardcore/`,
-            "Masturbation": `${baseUrl}/tags/masturbation/`,
-            "Kinky": `${baseUrl}/tags/kinky/`,
-            "PornPros": `${baseUrl}/tags/pornpros/`,
-            "Spizoo": `${baseUrl}/tags/spizoo/`
-        };
+                "All Studios": `${baseUrl}/studios/`,
+    "AdultTime": `${baseUrl}/studio/adulttime/`,
+    "Bangbros": `${baseUrl}/studio/bangbros/`,
+    "Brazzers": `${baseUrl}/studio/brazzers/`,
+    "DorcelClub": `${baseUrl}/studio/dorcelclub/`,
+    "DigitalPlayground": `${baseUrl}/studio/digitalplayground/`,
+    "Dogfart": `${baseUrl}/studio/dogfart/`,
+    "FakeHub": `${baseUrl}/studio/fakehub/`,
+    "ManyVids": `${baseUrl}/studio/manyvids/`,
+    "Mofos": `${baseUrl}/studio/mofos/`,
+    "Mylf": `${baseUrl}/studio/mylf/`,
+    "NaughtyAmerica": `${baseUrl}/studio/naughtyamerica/`,
+    "Nubiles": `${baseUrl}/studio/nubiles/`,
+    "OnlyFans": `${baseUrl}/studio/onlyfans/`,
+    "Private": `${baseUrl}/studio/private/`,
+    "RealityKings": `${baseUrl}/studio/realitykings/`,
+    "PornPros": `${baseUrl}/studio/pornpros/`,
+    "TeamSkeet": `${baseUrl}/studio/teamskeet/`,
+    "VXN": `${baseUrl}/studio/vxn/`
+
+    };
 
             const data = {};
             for (const [name, url] of Object.entries(categories)) {
