@@ -1,15 +1,15 @@
 (function () {
     const HEADERS = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0",
+        "Accept": '*/*',
+        "Accept-Language": "en-US,en;q=0.9",
         "Referer": "https://tube.perverzija.com/"
     };
 
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
         const items = [];
-        const itemPattern = /<div class="item"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="item-link"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+        const itemPattern = /<div class="bg-ad-right"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="bg-ad-right"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
