@@ -9,7 +9,7 @@
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
         const items = [];
-        const itemPattern = /<div class="flex"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="flex-none"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+        const itemPattern = /<div class="flex items"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="flex items"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
 
           let match;
         while ((match = itemPattern.exec(html)) !== null) {
