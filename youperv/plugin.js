@@ -1,15 +1,15 @@
-import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors';
-
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://youperv.com/"
     };
 
-        // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
+    // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
         const items = [];
-        const itemPattern="item"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="item-link"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+        const itemPattern = /<div class="item"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="item-link"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
@@ -39,41 +39,8 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             const baseUrl = manifest.baseUrl || "https://youperv.com";
             const categories = {
                 "Home": baseUrl,
-            "Most Viewed 30 Day": `${baseUrl}/most-viewed/`,
-            "Top Rated 30 Day": `${baseUrl}/top-rated/`,
-            "Anal": `${baseUrl}/tags/anal/`,
-            "Amateur": `${baseUrl}/tags/amateur/`,
-            "Anal Creampie": `${baseUrl}/tags/anal-creampie/`,
-            "Bathroom": `${baseUrl}/tags/bathroom/`,
-            "Big Dick": `${baseUrl}/tags/big-dick/`,
-            "Big Tits": `${baseUrl}/tags/big-tits/`,
-            "Beautiful Girl": `${baseUrl}/tags/beautiful-girl/`,
-            "Beautiful porn": `${baseUrl}/tags/beautiful-porn/`,
-            "Brunette": `${baseUrl}/tags/brunette/`,
-            "Blonde": `${baseUrl}/tags/blonde/`,
-            "Creampie": `${baseUrl}/tags/creampie/`,
-            "Cuckold": `${baseUrl}/tags/cuckold/`,
-            "Cumshot": `${baseUrl}/tags/cumshot/`,
-            "Female Orgasm": `${baseUrl}/tags/female-orgasm/`,
-            "Handjob": `${baseUrl}/tags/handjob/`,
-            "High Heels": `${baseUrl}/tags/high-heels/`,
-            "Interracial": `${baseUrl}/tags/interracial/`,
-            "Juicy Ass": `${baseUrl}/tags/juicy-ass/`,
-            "Kitchen": `${baseUrl}/tags/kitchen/`,
-            "Lesbian": `${baseUrl}/tags/lesbian/`,
-            "Masturbation": `${baseUrl}/tags/masturbation/`,
-            "Mom": `${baseUrl}/tags/mom/`,
-            "Milf": `${baseUrl}/tags/milf/`,
-            "Office": `${baseUrl}/tags/office/`,
-            "POV": `${baseUrl}/tags/pov/`,
-            "Red Head": `${baseUrl}/tags/red-head/`,
-            "Russian": `${baseUrl}/tags/russian/`,
-            "Small Tits": `${baseUrl}/tags/small-tits/`,
-            "Stockings": `${baseUrl}/tags/stockings/`,
-            "Story": `${baseUrl}/tags/story/`,
-            "Teacher": `${baseUrl}/tags/teacher/`,
-            "Threesome": `${baseUrl}/tags/threesome/`,
-            "Young Girl": `${baseUrl}/tags/young-girl/`
+                "Most Viewed": `${baseUrl}/top-50-most-viewed-videos.html`,
+                "Top Rated": `${baseUrl}/top-porn-videos.html`
             };
             
             const data = {};
@@ -189,42 +156,54 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
             const html = res.body || "";
-            const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+            const streams = [];
             
-            if (!iframeMatch) return cb({ success: false, errorCode: "NO_STREAMS" });
-
-            let videoHostUrl = iframeMatch[1];
-            if (videoHostUrl.startsWith('//')) videoHostUrl = 'https:' + videoHostUrl;
-
-            let streams = [];
-            try {
-                if (videoHostUrl.includes('mixdrop')) {
-                    streams = await new MixDrop().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('streamtape')) {
-                    streams = await new StreamTape().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('filemoon')) {
-                    streams = await new FileMoon().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('dood')) {
-                    streams = await new DoodStream().getUrl(videoHostUrl);
+            // Look for iframes with video sources
+            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
+            let match;
+            while ((match = iframePattern.exec(html)) !== null) {
+                const iframeUrl = match[1];
+                // Check if it looks like a video player
+                if (iframeUrl.includes('player') || iframeUrl.includes('video') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4') || iframeUrl.includes('.m3u8')) {
+                    streams.push(new StreamResult({
+                        url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
+                        source: "Youperv",
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                    }));
                 }
-            } catch (e) {
-                console.error("Extractor failed for " + videoHostUrl, e);
             }
-
-            if (streams && streams.length > 0) {
-                const results = streams.map(s => new StreamResult({
-                    url: "MAGIC_PROXY_v1" + Buffer.from(s.url).toString('base64'),
-                    quality: s.quality || "auto",
-                    source: "Extracted", // Yahan 'Extracted' ki jagah host ka naam bhi daal sakte hain
-                    httpHeaders: {
-                        "Referer": videoHostUrl,
-                        "User-Agent": HEADERS["User-Agent"]
-                    }
-                }));
-                return cb({ success: true, data: results });
+            
+            // Also check for video tag with source
+            if (streams.length === 0) {
+                const videoPattern = /<video[^>]*>[\s\S]*?<source[^>]*src="([^"]+)"[^>]*>/gi;
+                while ((match = videoPattern.exec(html)) !== null) {
+                    const videoUrl = match[1];
+                    streams.push(new StreamResult({
+                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
+                        source: "Video",
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                    }));
+                }
             }
-
-            cb({ success: false, errorCode: "NO_STREAMS" });
+            
+            // Direct video file link
+            if (streams.length === 0) {
+                const directPattern = /href="([^"]+\.mp4)"[^>]*>/gi;
+                while ((match = directPattern.exec(html)) !== null) {
+                    const videoUrl = match[1];
+                    streams.push(new StreamResult({
+                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
+                        source: "Streamtape,Direct,Voe",
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                    }));
+                }
+            }
+            
+            if (streams.length > 0) {
+                cb({ success: true, data: streams });
+            } else {
+                cb({ success: false, errorCode: "NO_STREAMS" });
+            }
         } catch (e) {
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
