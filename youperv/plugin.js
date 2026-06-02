@@ -179,64 +179,66 @@
         }
     }
 
+
     async function loadStreams(url, cb) {
-        try {
-            const res = await http_get(url, HEADERS);
-            if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+    try {
+        const res = await http_get(url, HEADERS);
+        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+        
+        const html = res.body || "";
+        const streams = [];
+        
+        // Regex jo HTML me se saare URLs ko nikalega
+        const urlPattern = /(?:https?:)?\/\/[^\s"'><]+/gi;
+        let match;
+        
+        while ((match = urlPattern.exec(html)) !== null) {
+            let foundUrl = match[0];
             
-            const html = res.body || "";
-            const streams = [];
+            // Relative URL ko absolute URL me convert karna
+            if (foundUrl.startsWith('//')) {
+                foundUrl = "https:" + foundUrl;
+            }
+
+            let sourceName = "";
             
-            // Look for iframes with video sources
-            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
-            let match;
-            while ((match = iframePattern.exec(html)) !== null) {
-                const iframeUrl = match[1];
-                // Check if it looks like a video player
-                if (iframeUrl.includes('player') || iframeUrl.includes('video') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4') || iframeUrl.includes('.m3u8')) {
+            // 1. Check for Streamtape
+            if (foundUrl.includes("streamtape.com") || foundUrl.includes("stape.")) {
+                sourceName = "Streamtape";
+            }
+            // 2. Check for VOE
+            else if (foundUrl.includes("voe.sx") || foundUrl.includes("voe-player")) {
+                sourceName = "VOE";
+            }
+
+            // Agar Streamtape ya VOE me se koi match milta hai
+            if (sourceName !== "") {
+                // Duplicate check taaki same server baar-baar add na ho
+                const isDuplicate = streams.some(s => s.url.includes(btoa(foundUrl)));
+                
+                if (!isDuplicate) {
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
-                        source: "Youperv",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        url: "MAGIC_PROXY_v1" + btoa(foundUrl),
+                        source: sourceName,
+                        headers: { 
+                            "Referer": url, 
+                            "User-Agent": HEADERS["User-Agent"] 
+                        }
                     }));
                 }
             }
-            
-            // Also check for video tag with source
-            if (streams.length === 0) {
-                const videoPattern = /<video[^>]*>[\s\S]*?<source[^>]*src="([^"]+)"[^>]*>/gi;
-                while ((match = videoPattern.exec(html)) !== null) {
-                    const videoUrl = match[1];
-                    streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
-                        source: "Video",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
-                    }));
-                }
-            }
-            
-            // Direct video file link
-            if (streams.length === 0) {
-                const directPattern = /href="([^"]+\.mp4)"[^>]*>/gi;
-                while ((match = directPattern.exec(html)) !== null) {
-                    const videoUrl = match[1];
-                    streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
-                        source: "Direct",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
-                    }));
-                }
-            }
-            
-            if (streams.length > 0) {
-                cb({ success: true, data: streams });
-            } else {
-                cb({ success: false, errorCode: "NO_STREAMS" });
-            }
-        } catch (e) {
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
+        
+        // Callback Response Handle karna
+        if (streams.length > 0) {
+            cb({ success: true, data: streams });
+        } else {
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape or VOE streams found." });
+        }
+    } catch (e) {
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
+}
 
     globalThis.getHome = getHome;
     globalThis.search = search;
