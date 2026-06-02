@@ -1,9 +1,9 @@
 {
-  "packageName": "com.skystream-nsfw.pervzila",
-  "name": "Pervzila",
+  "packageName": "com.skystream-nsfw.perverzija",
+  "name": "Perverzija",
   "version": 1,
   "baseUrl": "https://tube.perverzija.com/",
-  "description": "Pervzila Site for 18+",
+  "description": "Perverzija Site for 18+",
   "isAdult": true,
   "authors": ["teachmind09"],
   "languages": ["en"],
