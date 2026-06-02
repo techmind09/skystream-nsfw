@@ -193,7 +193,7 @@
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
-                        source: "Streamtape,Direct,Voe",
+                        source: "Direct",
                         headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
