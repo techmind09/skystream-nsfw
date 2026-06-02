@@ -180,7 +180,7 @@
     }
 
 
-async function loadStreams(url, cb) {
+ async function loadStreams(url, cb) {
     try {
         const res = await http_get(url, HEADERS);
         if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
@@ -188,55 +188,92 @@ async function loadStreams(url, cb) {
         const html = res.body || "";
         const streams = [];
 
-        // Universal Regex: Jo HTML text, scripts, aur attributes me se saare valid links nikalega
-        const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
-        let match;
-
-        while ((match = universalPattern.exec(html)) !== null) {
-            let foundUrl = match[0];
+        // Helper function taaki baar-baar duplicate check aur push na karna pade
+        function addStreamIfValid(rawUrl, name) {
+            if (!rawUrl) return;
+            let cleanUrl = rawUrl.replace(/[;,\)\(\}\}\]]$/, '').trim();
+            if (cleanUrl.startsWith('//')) cleanUrl = "https:" + cleanUrl;
             
-            // Clean URL: Code crash na ho isliye end ke brackets ya comma saaf karna
-            foundUrl = foundUrl.replace(/[;,\)\(\}\}\]]$/, '');
-
-            // Relative URL ko protocol handle dena
-            if (foundUrl.startsWith('//')) {
-                foundUrl = "https:" + foundUrl;
-            }
-
-            let sourceName = "";
-            let lowerUrl = foundUrl.toLowerCase();
-            
-            // 1. Strict 'streamtape' broad matching (Isse .xyz, .com, .to sab cover ho jayenge)
-            if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
-                sourceName = "Streamtape";
-            } 
-            // 2. VOE matching saare badle huye domains ke liye
-            else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
-                sourceName = "VOE";
-            }
-
-            // Agar valid match milta hai
-            if (sourceName !== "") {
-                // Duplicate check taaki exact same player list me do baar show na ho
-                const isDuplicate = streams.some(s => s.url.includes(btoa(foundUrl)));
+            if (cleanUrl.startsWith('http')) {
+                const isDuplicate = streams.some(s => s.url.includes(btoa(cleanUrl)));
                 if (!isDuplicate) {
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(foundUrl),
-                        source: sourceName,
-                        headers: { 
-                            "Referer": url, 
-                            "User-Agent": HEADERS["User-Agent"] 
-                        }
+                        url: "MAGIC_PROXY_v1" + btoa(cleanUrl),
+                        source: name,
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
         }
 
-        // Final response handling
+        // --- METHOD 1: Normal Broad Scan ---
+        const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
+        let match;
+        while ((match = universalPattern.exec(html)) !== null) {
+            let foundUrl = match[0];
+            let lowerUrl = foundUrl.toLowerCase();
+            
+            if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
+                addStreamIfValid(foundUrl, "Streamtape");
+            } else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
+                addStreamIfValid(foundUrl, "VOE");
+            }
+        }
+
+        // --- METHOD 2: Data-Attributes Scan (Hidden Tabs/Players) ---
+        const dataAttrPattern = /data-(?:src|link|video|url|id|code)=["']([^"']+)["']/gi;
+        let attrMatch;
+        while ((attrMatch = dataAttrPattern.exec(html)) !== null) {
+            let content = attrMatch[1];
+            let lowerContent = content.toLowerCase();
+            
+            if (lowerContent.includes("streamtape") || lowerContent.includes("stape") || lowerContent.includes("strtape")) {
+                addStreamIfValid(content, "Streamtape");
+            } else if (lowerContent.includes("voe")) {
+                addStreamIfValid(content, "VOE");
+            }
+            
+            // Agar attribute ke andar sirf base64 string ho (Try decoding)
+            try {
+                if (content.length > 15 && !content.includes(" ")) {
+                    let decoded = atob(content);
+                    if (decoded.includes("streamtape") || decoded.includes("stape")) addStreamIfValid(decoded, "Streamtape");
+                    else if (decoded.includes("voe")) addStreamIfValid(decoded, "VOE");
+                }
+            } catch(e) {}
+        }
+
+        // --- METHOD 3: Full Base64/Obfuscated Text Extraction ---
+        // Kabhi-kabhi links variable me 'ey...' ya 'aHR0cD...' se encoded hote hain
+        const base64Pattern = /["'](aHR0cHM6Ly[a-zA-Z0-9+/=]+|[a-zA-Z0-9+/=]{30,})["']/g;
+        let b64Match;
+        while ((b64Match = base64Pattern.exec(html)) !== null) {
+            try {
+                let decoded = atob(b64Match[1]);
+                let lowerDecoded = decoded.toLowerCase();
+                if (lowerDecoded.includes("streamtape") || lowerDecoded.includes("stape")) {
+                    addStreamIfValid(decoded, "Streamtape");
+                } else if (lowerDecoded.includes("voe")) {
+                    addStreamIfValid(decoded, "VOE");
+                }
+            } catch (e) {}
+        }
+
+        // --- METHOD 4: Target ID / Frame Fallback ---
+        // Agar kuch nahi mila to ho sakta hai website embed paths use kar rahi ho
+        if (streams.length === 0) {
+            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
+            let frameMatch;
+            while ((frameMatch = iframePattern.exec(html)) !== null) {
+                addStreamIfValid(frameMatch[1], "Video Source");
+            }
+        }
+
+        // Output Handling
         if (streams.length > 0) {
             cb({ success: true, data: streams });
         } else {
-            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape (.xyz) or VOE streams found." });
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape or VOE streams found." });
         }
     } catch (e) {
         cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
