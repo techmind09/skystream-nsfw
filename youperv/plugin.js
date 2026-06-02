@@ -1,4 +1,5 @@
 import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors';
+
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -183,57 +184,33 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
-    
+    import { MixDrop, StreamTape } from 'skystream-extractors';
+
     async function loadStreams(url, cb) {
-        try {
-            const res = await http_get(url, HEADERS);
-            if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
-            
-            const html = res.body || "";
-            // Iframe extract karein
-            const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-            
-            if (!iframeMatch) return cb({ success: false, errorCode: "NO_STREAMS" });
+    // 1. Scrape your site to find the embedded video host URL
+    const videoHostUrl = await scrapeEmbedUrl(url); 
+    let streams = [];
 
-            // Sahi variable ka use karein (cleanUrl)
-            let videoHostUrl = iframeMatch[1];
-            if (videoHostUrl.startsWith('//')) videoHostUrl = 'https:' + videoHostUrl;
-
-            let streams = [];
-            try {
-                // Ab 'videoHostUrl' variable defined hai aur sahi URL contain karta hai
-                if (videoHostUrl.includes('mixdrop')) {
-                    streams = await new MixDrop().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('streamtape')) {
-                    streams = await new StreamTape().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('filemoon')) {
-                    streams = await new FileMoon().getUrl(videoHostUrl);
-                } else if (videoHostUrl.includes('dood')) {
-                    streams = await new DoodStream().getUrl(videoHostUrl);
-                }
-            } catch (e) {
-                console.error("Extractor error: ", e);
-            }
-            
-            if (streams && streams.length > 0) {
-                const results = streams.map(s => new StreamResult({
-                    url: s.url,
-                    quality: s.quality || "auto",
-                    source: "Extracted",
-                    headers: { "Referer": videoHostUrl }
-                }));
-                return cb({ success: true, data: results });
-            }
-
-            cb({ success: false, errorCode: "NO_STREAMS" });
-        } catch (e) {
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+    // 2. Identify the host and pass it to the correct extractor class
+    try {
+        if (videoHostUrl.includes('mixdrop.co')) {
+            const extractor = new MixDrop();
+            streams = await extractor.getUrl(videoHostUrl);
+        } else if (videoHostUrl.includes('streamtape.com')) {
+            const extractor = new StreamTape();
+            streams = await extractor.getUrl(videoHostUrl);
         }
+        
+        // streams is an array of IExtractorLink / StreamResult objects
+        if (streams.length > 0) {
+            return cb({ success: true, data: streams });
+        }
+    } catch (e) {
+        console.error("Extractor failed: ", e);
     }
-
-
-    u
-
+    
+    cb({ success: true, data: [] });
+}
 
     globalThis.getHome = getHome;
     globalThis.search = search;
