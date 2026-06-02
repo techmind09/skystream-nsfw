@@ -266,19 +266,77 @@
             let frameMatch;
             while ((frameMatch = iframePattern.exec(html)) !== null) {
                 addStreamIfValid(frameMatch[1], "Video Source");
+
+                async function loadStreams(url, cb) {
+    try {
+        const res = await http_get(url, HEADERS);
+        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+        
+        const html = res.body || "";
+        const streams = [];
+
+        // Helper function for safe extraction and duplicate check
+        function addStreamIfValid(rawUrl, name) {
+            if (!rawUrl) return;
+            let cleanUrl = rawUrl.replace(/[;,\)\(\}\}\]]$/, '').trim();
+            if (cleanUrl.startsWith('//')) cleanUrl = "https:" + cleanUrl;
+            
+            if (cleanUrl.startsWith('http')) {
+                const isDuplicate = streams.some(s => s.url.includes(btoa(cleanUrl)));
+                if (!isDuplicate) {
+                    streams.push(new StreamResult({
+                        url: "MAGIC_PROXY_v1" + btoa(cleanUrl),
+                        source: name,
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                    }));
+                }
             }
         }
 
-        // Output Handling
+        // Broad URL Scanner (Extracts links from iframes, scripts, and attributes)
+        const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
+        let match;
+        while ((match = universalPattern.exec(html)) !== null) {
+            let foundUrl = match[0];
+            let lowerUrl = foundUrl.toLowerCase();
+            
+            // 1. Streamtape Filter
+            if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
+                addStreamIfValid(foundUrl, "Streamtape");
+            } 
+            // 2. VOE Filter
+            else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
+                addStreamIfValid(foundUrl, "VOE");
+            }
+            // 3. Upstream Filter
+            else if (lowerUrl.includes("upstream.to") || lowerUrl.includes("upstream")) {
+                addStreamIfValid(foundUrl, "Upstream");
+            }
+            // 4. Filemoon Filter
+            else if (lowerUrl.includes("filemoon")) {
+                addStreamIfValid(foundUrl, "Filemoon");
+            }
+            // 5. Mixdrop Filter
+            else if (lowerUrl.includes("mixdrop")) {
+                addStreamIfValid(foundUrl, "Mixdrop");
+            }
+            // 6. Doodstream Filter
+            else if (lowerUrl.includes("dood.") || lowerUrl.includes("doodstream")) {
+                addStreamIfValid(foundUrl, "Doodstream");
+            }
+        }
+
+        // Response handling
         if (streams.length > 0) {
             cb({ success: true, data: streams });
         } else {
-            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape or VOE streams found." });
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No supported premium streams found." });
         }
     } catch (e) {
         cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
 }
+
 
     globalThis.getHome = getHome;
     globalThis.search = search;
