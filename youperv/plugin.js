@@ -180,42 +180,45 @@
     }
 
 
-    async function loadStreams(url, cb) {
+async function loadStreams(url, cb) {
     try {
         const res = await http_get(url, HEADERS);
         if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
         
         const html = res.body || "";
         const streams = [];
-        
-        // Regex jo HTML me se saare URLs ko nikalega
-        const urlPattern = /(?:https?:)?\/\/[^\s"'><]+/gi;
+
+        // Universal Regex: Jo HTML text, scripts, aur attributes me se saare valid links nikalega
+        const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
         let match;
-        
-        while ((match = urlPattern.exec(html)) !== null) {
+
+        while ((match = universalPattern.exec(html)) !== null) {
             let foundUrl = match[0];
             
-            // Relative URL ko absolute URL me convert karna
+            // Clean URL: Code crash na ho isliye end ke brackets ya comma saaf karna
+            foundUrl = foundUrl.replace(/[;,\)\(\}\}\]]$/, '');
+
+            // Relative URL ko protocol handle dena
             if (foundUrl.startsWith('//')) {
                 foundUrl = "https:" + foundUrl;
             }
 
             let sourceName = "";
+            let lowerUrl = foundUrl.toLowerCase();
             
-            // 1. Check for Streamtape
-            if (foundUrl.includes("streamtape.com") || foundUrl.includes("stape.")) {
+            // 1. Strict 'streamtape' broad matching (Isse .xyz, .com, .to sab cover ho jayenge)
+            if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
                 sourceName = "Streamtape";
-            }
-            // 2. Check for VOE
-            else if (foundUrl.includes("voe.sx") || foundUrl.includes("voe-player")) {
+            } 
+            // 2. VOE matching saare badle huye domains ke liye
+            else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
                 sourceName = "VOE";
             }
 
-            // Agar Streamtape ya VOE me se koi match milta hai
+            // Agar valid match milta hai
             if (sourceName !== "") {
-                // Duplicate check taaki same server baar-baar add na ho
+                // Duplicate check taaki exact same player list me do baar show na ho
                 const isDuplicate = streams.some(s => s.url.includes(btoa(foundUrl)));
-                
                 if (!isDuplicate) {
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(foundUrl),
@@ -228,12 +231,12 @@
                 }
             }
         }
-        
-        // Callback Response Handle karna
+
+        // Final response handling
         if (streams.length > 0) {
             cb({ success: true, data: streams });
         } else {
-            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape or VOE streams found." });
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No Streamtape (.xyz) or VOE streams found." });
         }
     } catch (e) {
         cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
