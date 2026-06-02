@@ -1,20 +1,15 @@
-// 1. Imports hamesha sabse upar honge
 import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors';
-
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Referer": "https://youperv.com/"
     };
 
-    // ... (aapke parseVideoItems, getHome, search, load functions wahi rahenge)
-
     async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
-            // Iframe URL extract karein (Manual scraping logic)
             const html = res.body || "";
             const iframeMatch = html.match(/<iframe[^>]+src=["']([^"']+)["']/i);
             
@@ -39,9 +34,8 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
             }
 
             if (streams && streams.length > 0) {
-                // Formatting for SkyStream Player
-                const results = streams.map(s => new StreamResult({
-                    url: "MAGIC_PROXY_v1" + btoa(s.url),
+                 const results = streams.map(s => new StreamResult({
+                    url: "MAGIC_PROXY_v1" + Buffer.from(s.url).toString('base64'),
                     quality: s.quality || "auto",
                     source: "Extracted"
                 }));
