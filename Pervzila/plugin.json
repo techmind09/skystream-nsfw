@@ -1,0 +1,11 @@
+{
+  "packageName": "com.skystream-nsfw.pervzila",
+  "name": "Pervzila",
+  "version": 1,
+  "baseUrl": "https://pervl4.xtremestream.xyz",
+  "description": "Pervzila Site for 18+",
+  "isAdult": true,
+  "authors": ["teachmind09"],
+  "languages": ["en"],
+  "categories": ["Adult"]
+}
