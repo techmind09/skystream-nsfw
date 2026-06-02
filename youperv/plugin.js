@@ -30,7 +30,7 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
                     streams = await new DoodStream().getUrl(videoHostUrl);
                 }
             } catch (e) {
-                console.error("Extractor Error:", e);
+                console.log("Extracted URL check:", streams[0].url);
             }
 
             if (streams && streams.length > 0) {
@@ -38,6 +38,9 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
                     url: "MAGIC_PROXY_v1" + Buffer.from(s.url).toString('base64'),
                     quality: s.quality || "auto",
                     source: "Extracted"
+                     httpHeaders: {
+        "Referer": videoHostUrl,
+        "User-Agent": HEADERS["User-Agent"]
                 }));
                 return cb({ success: true, data: results });
             }
