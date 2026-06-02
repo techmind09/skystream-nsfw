@@ -267,7 +267,7 @@
             while ((frameMatch = iframePattern.exec(html)) !== null) {
                 addStreamIfValid(frameMatch[1], "Video Source");
 
-                async function loadStreams(url, cb) {
+    async function loadStreams(url, cb) {
     try {
         const res = await http_get(url, HEADERS);
         if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
@@ -337,8 +337,7 @@
     }
 }
 
-
-    globalThis.getHome = getHome;
+ globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
     globalThis.loadStreams = loadStreams;
