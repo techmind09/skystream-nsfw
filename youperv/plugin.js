@@ -1,4 +1,5 @@
 import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors';
+
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -30,17 +31,18 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
                     streams = await new DoodStream().getUrl(videoHostUrl);
                 }
             } catch (e) {
-                console.log("Extracted URL check:", streams[0].url);
+                console.error("Extractor failed for " + videoHostUrl, e);
             }
 
             if (streams && streams.length > 0) {
-                 const results = streams.map(s => new StreamResult({
+                const results = streams.map(s => new StreamResult({
                     url: "MAGIC_PROXY_v1" + Buffer.from(s.url).toString('base64'),
                     quality: s.quality || "auto",
-                    source: "Extracted"
-                     httpHeaders: {
-        "Referer": videoHostUrl,
-        "User-Agent": HEADERS["User-Agent"]
+                    source: "Extracted", // Yahan 'Extracted' ki jagah host ka naam bhi daal sakte hain
+                    httpHeaders: {
+                        "Referer": videoHostUrl,
+                        "User-Agent": HEADERS["User-Agent"]
+                    }
                 }));
                 return cb({ success: true, data: results });
             }
@@ -56,3 +58,5 @@ import { MixDrop, StreamTape, FileMoon, DoodStream } from 'skystream-extractors'
     globalThis.load = load;
     globalThis.loadStreams = loadStreams;
 })();
+
+
