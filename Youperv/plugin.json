@@ -1,0 +1,12 @@
+Blame
+{
+  "packageName": "com.skystream-nsfw.Youperv",
+  "name": "Youperv",
+  "version": 1,
+  "baseUrl": "https://youperv.com",
+  "description": "Youperv Site for 18+",
+  "isAdult": true,
+  "authors": ["teachmind09"],
+  "languages": ["en"],
+  "categories": ["Adult"]
+}
