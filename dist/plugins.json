@@ -1,41 +1,4 @@
-[
-  {
-    "packageName": "com.skystream-nsfw.perverzija",
-    "name": "Perverzija",
-    "version": 1,
-    "baseUrl": "https://tube.perverzija.com/",
-    "description": "Perverzija Site for 18+",
-    "isAdult": true,
-    "authors": [
-      "teachmind09"
-    ],
-    "languages": [
-      "en"
-    ],
-    "categories": [
-      "Adult"
-    ],
-    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.perverzija.sky"
-  },
-  {
-    "packageName": "com.skystream-nsfw.xmoviesforyou",
-    "name": "Xmovieforyou",
-    "version": 1,
-    "baseUrl": "https://xmoviesforyou.com/",
-    "description": "Xmoviesforyou Site for 18+",
-    "isAdult": true,
-    "authors": [
-      "teachmind09"
-    ],
-    "languages": [
-      "en"
-    ],
-    "categories": [
-      "Adult"
-    ],
-    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.xmoviesforyou.sky"
-  },
-  {
+ {
     "packageName": "com.skystream-nsfw.youperv",
     "name": "Youperv",
     "version": 1,
