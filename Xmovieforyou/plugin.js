@@ -11,7 +11,9 @@
     function parseVideoItems(html) {
         const items = [];
         // Updated Regex for safety
-        const itemPattern = /<div class="flex-none"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="flex-none"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+
+        const itemPattern = /<div class="flex items-center gap-3 md:gap-4"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/
+
 
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
