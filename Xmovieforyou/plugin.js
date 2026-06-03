@@ -20,8 +20,8 @@
             const altText = match[3];
             
             const title = altText.split('(')[0].trim();
-            const fullUrl = href.startsWith('http') ? href : "https://xmoviesforyou.com/" + href;
-            const posterUrl = posterSrc.startsWith('http') ? posterSrc : "https://xmoviesforyou.com/" + posterSrc;
+            const fullUrl = href.startsWith('http') ? href : "https://xmoviesforyou.com" + href;
+            const posterUrl = posterSrc.startsWith('http') ? posterSrc : "https://xmoviesforyou.com" + posterSrc;
              
             if (title && href) {
                 items.push(new MultimediaItem({
