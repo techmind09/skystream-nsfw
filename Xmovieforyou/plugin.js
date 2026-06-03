@@ -4,12 +4,14 @@
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
         "Referer": "https://xmoviesforyou.com/"
+          'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
     };
 
     function parseVideoItems(html) {
         const items = [];
         // Updated Regex for safety
-        const itemPattern = /<div class="flex items"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="flex items"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+        const itemPattern = /<div class="flex-none"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="flex-none"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
 
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
