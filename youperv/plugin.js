@@ -267,76 +267,118 @@
             while ((frameMatch = iframePattern.exec(html)) !== null) {
                 addStreamIfValid(frameMatch[1], "Video Source");
 
-    async function loadStreams(url, cb) {
-    try {
-        const res = await http_get(url, HEADERS);
-        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
-        
-        const html = res.body || "";
-        const streams = [];
 
-        // Helper function for safe extraction and duplicate check
-        function addStreamIfValid(rawUrl, name) {
-            if (!rawUrl) return;
-            let cleanUrl = rawUrl.replace(/[;,\)\(\}\}\]]$/, '').trim();
-            if (cleanUrl.startsWith('//')) cleanUrl = "https:" + cleanUrl;
+         async function loadStreams(url, cb) {
+             try {
+            const res = await http_get(url, HEADERS);
+            if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
-            if (cleanUrl.startsWith('http')) {
-                const isDuplicate = streams.some(s => s.url.includes(btoa(cleanUrl)));
-                if (!isDuplicate) {
-                    streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(cleanUrl),
-                        source: name,
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
-                    }));
+            const html = res.body || "";
+            const streams = [];
+
+            // Helper function: Safe extraction, URL cleaning aur duplicate check karne ke liye
+            function addStreamIfValid(rawUrl, name) {
+                if (!rawUrl) return;
+                let cleanUrl = rawUrl.replace(/[;,\)\(\}\}\]]$/, '').trim();
+                if (cleanUrl.startsWith('//')) cleanUrl = "https:" + cleanUrl;
+                
+                if (cleanUrl.startsWith('http')) {
+                    const isDuplicate = streams.some(s => s.url.includes(btoa(cleanUrl)));
+                    if (!isDuplicate) {
+                        streams.push(new StreamResult({
+                            url: "MAGIC_PROXY_v1" + btoa(cleanUrl),
+                            source: name,
+                            headers: { 
+                                "Referer": url, 
+                                "User-Agent": HEADERS["User-Agent"] 
+                            }
+                        }));
+                    }
                 }
             }
-        }
 
-        // Broad URL Scanner (Extracts links from iframes, scripts, and attributes)
-        const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
-        let match;
-        while ((match = universalPattern.exec(html)) !== null) {
-            let foundUrl = match[0];
-            let lowerUrl = foundUrl.toLowerCase();
-            
-            // 1. Streamtape Filter
-            if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
-                addStreamIfValid(foundUrl, "Streamtape");
-            } 
-            // 2. VOE Filter
-            else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
-                addStreamIfValid(foundUrl, "VOE");
-            }
-            // 3. Upstream Filter
-            else if (lowerUrl.includes("upstream.to") || lowerUrl.includes("upstream")) {
-                addStreamIfValid(foundUrl, "Upstream");
-            }
-            // 4. Filemoon Filter
-            else if (lowerUrl.includes("filemoon")) {
-                addStreamIfValid(foundUrl, "Filemoon");
-            }
-            // 5. Mixdrop Filter
-            else if (lowerUrl.includes("mixdrop")) {
-                addStreamIfValid(foundUrl, "Mixdrop");
-            }
-            // 6. Doodstream Filter
-            else if (lowerUrl.includes("dood.") || lowerUrl.includes("doodstream")) {
-                addStreamIfValid(foundUrl, "Doodstream");
-            }
-        }
+            // --- METHOD 1: Broad Universal Regex Scanner (HTML aur Scripts ke liye) ---
+            const universalPattern = /(?:https?:)?\/\/[^\s"'><`]+/gi;
+            let match;
 
-        // Response handling
-        if (streams.length > 0) {
-            cb({ success: true, data: streams });
-        } else {
-            cb({ success: false, errorCode: "NO_STREAMS", message: "No supported premium streams found." });
+            while ((match = universalPattern.exec(html)) !== null) {
+                let foundUrl = match[0];
+                let lowerUrl = foundUrl.toLowerCase();
+                
+                // 1. Streamtape
+                if (lowerUrl.includes("streamtape") || lowerUrl.includes("stape.") || lowerUrl.includes("strtape.")) {
+                    addStreamIfValid(foundUrl, "Streamtape");
+                } 
+                // 2. VOE
+                else if (lowerUrl.includes("voe.sx") || lowerUrl.includes("voe-player") || lowerUrl.includes("voe.to") || lowerUrl.includes("/v/voe")) {
+                    addStreamIfValid(foundUrl, "VOE");
+                }
+                // 3. Upstream
+                else if (lowerUrl.includes("upstream.to") || lowerUrl.includes("upstream")) {
+                    addStreamIfValid(foundUrl, "Upstream");
+                }
+                // 4. Filemoon
+                else if (lowerUrl.includes("filemoon")) {
+                    addStreamIfValid(foundUrl, "Filemoon");
+                }
+                // 5. Mixdrop
+                else if (lowerUrl.includes("mixdrop")) {
+                    addStreamIfValid(foundUrl, "Mixdrop");
+                }
+                // 6. Doodstream
+                else if (lowerUrl.includes("dood.") || lowerUrl.includes("doodstream")) {
+                    addStreamIfValid(foundUrl, "Doodstream");
+                }
+                // 7. Xtremestream
+                else if (lowerUrl.includes("xtremestream") || lowerUrl.includes("xtreamstream") || lowerUrl.includes("xtstream")) {
+                    addStreamIfValid(foundUrl, "Xtremestream");
+                }
+            }
+
+            // --- METHOD 2: Generic Video Tags & Iframes Extraction ("Video" Source) ---
+            const videoPattern = /<source[^>]*src="([^"]+)"[^>]*>/gi;
+            while ((match = videoPattern.exec(html)) !== null) {
+                addStreamIfValid(match[1], "Video");
+            }
+
+            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
+            while ((match = iframePattern.exec(html)) !== null) {
+                let iframeUrl = match[1];
+                let lowerIframe = iframeUrl.toLowerCase();
+                
+                let isPremium = ["streamtape", "stape", "voe", "upstream", "filemoon", "mixdrop", "dood", "xtremestream"].some(k => lowerIframe.includes(k));
+                
+                if (!isPremium && (iframeUrl.includes('player') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4'))) {
+                    addStreamIfValid(iframeUrl, "Video");
+                }
+            }
+
+            // --- METHOD 3: Data-Attributes Fallback (Hidden Players) ---
+            const dataAttrPattern = /data-(?:src|link|video|url)=["']([^"']+)["']/gi;
+            let attrMatch;
+            while ((attrMatch = dataAttrPattern.exec(html)) !== null) {
+                let content = attrMatch[1];
+                let lowerContent = content.toLowerCase();
+                
+                if (lowerContent.includes("streamtape") || lowerContent.includes("stape")) addStreamIfValid(content, "Streamtape");
+                else if (lowerContent.includes("voe")) addStreamIfValid(content, "VOE");
+                else if (lowerContent.includes("upstream")) addStreamIfValid(content, "Upstream");
+                else if (lowerContent.includes("filemoon")) addStreamIfValid(content, "Filemoon");
+                else if (lowerContent.includes("mixdrop")) addStreamIfValid(content, "Mixdrop");
+                else if (lowerContent.includes("dood")) addStreamIfValid(content, "Doodstream");
+                else if (lowerContent.includes("xtremestream")) addStreamIfValid(content, "Xtremestream");
+            }
+
+            // Final Response Handling
+            if (streams.length > 0) {
+                cb({ success: true, data: streams });
+            } else {
+                cb({ success: false, errorCode: "NO_STREAMS", message: "No supported premium streams found." });
+            }
+        } catch (e) {
+            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
-    } catch (e) {
-        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
-}
-
  globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
