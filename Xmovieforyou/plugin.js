@@ -37,39 +37,83 @@
     }
     
     async function getHome(cb) {
-        try {
-            const baseUrl = "https://xmoviesforyou.com";
-            
-            // Timeout se bachne ke liye sirf main categories rakhi hain
-            const categories = {
-                "Home": baseUrl + "/",
-                "Most Viewed": `${baseUrl}/most-viewed/`,
-                "Top Rated": `${baseUrl}/top-rated/`,
-                "Teen": `${baseUrl}/tags/teen/`,
-                "MILF": `${baseUrl}/tags/milf/`,
-                "Anal": `${baseUrl}/tags/anal/`,
-                "Lesbian": `${baseUrl}/tags/lesbian/`
-            };
-            
-            const data = {};
-            for (const [name, url] of Object.entries(categories)) {
-                try {
-                    const res = await http_get(url, HEADERS);
-                    if (res.status === 200 && res.body) {
-                        const items = parseVideoItems(res.body);
-                        if (items.length > 0) {
-                            data[name] = items.slice(0, 20);
-                        }
-                    }
-                } catch (e) {
-                    console.error(`Error fetching ${name}: ${e.message}`);
-                }
-            }
-            cb({ success: true, data });
-        } catch (e) {
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
-        }
+    try {
+    const extractedItems = [
+            {
+                "title": "[Lubed] Vivienne Vo (Oil Overload / 05.26.2026)",
+                "url": "https://xmoviesforyou.com/lubed-vivienne-vo-oil-overload",
+                "posterUrl": "https://xmoviescdn.online/2026/05/lubed-vivienne-vo-oil-overload-xmoviesforyou-6a163f2d9e852.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[IsiahMaxwellXXX] Roxie Sinner (Sucks BBC Balls for Isiah Maxwell BBC Creampie / 05.24.2026)",
+                "url": "https://xmoviesforyou.com/isiahmaxwellxxx-roxie-sinner-sucks-bbc-balls-for-isiah-maxwell-bbc-creampie",
+                "posterUrl": "https://xmoviescdn.online/2026/05/isiahmaxwellxxx-roxie-sinner-sucks-bbc-balls-for-isiah-maxwell-bbc-creampie-xmoviesforyou-6a13a7c3ad03f.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[BrazzersExxtra] Kate Quinn (Stress Relief / 05.24.2026)",
+                "url": "https://xmoviesforyou.com/brazzersexxtra-kate-quinn-stress-relief",
+                "posterUrl": "https://xmoviescdn.online/2026/05/brazzersexxtra-kate-quinn-stress-relief-xmoviesforyou-6a12fcdc89a85.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[ElegantAngel] Roxie Sinner (Bush and Suckable Tits / 05.11.2026)",
+                "url": "https://xmoviesforyou.com/elegantangel-roxie-sinner-bush-and-suckable-tits",
+                "posterUrl": "https://xmoviescdn.online/2026/05/elegantangel-roxie-sinner-bush-and-suckable-tits-xmoviesforyou-6a01d5aa75821.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[NewSensations] Summer Renee (Summer Renee Is His Business And Business Is Good / 05.23.2026)",
+                "url": "https://xmoviesforyou.com/newsensations-summer-renee-is-his-business-and-business-is-good",
+                "posterUrl": "https://xmoviescdn.online/2026/05/newsensations-summer-renee-is-his-business-and-business-is-good-xmoviesforyou-6a11a6ac103b5.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[BrazzersExxtra] Kendra Sunderland, Cubbi Thompson (Cubbi & Kendra Admire The Scenery / 05.27.2026)",
+                "url": "https://xmoviesforyou.com/brazzersexxtra-kendra-sunderland-cubbi-thompson-cubbi-kendra-admire-the-scenery",
+                "posterUrl": "https://xmoviescdn.online/2026/05/brazzersexxtra-kendra-sunderland-cubbi-thompson-cubbi-kendra-admire-the-scenery-xmoviesforyou-6a16e99b276bb.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[ExxxtraSmall] Vivienne Vo (Pocket-Sized Pussy for Your Cardio Routine (Vivienne Vo Debut) / 05.25.2026)",
+                "url": "https://xmoviesforyou.com/exxxtrasmall-vivienne-vo-pocketsized-pussy-for-your-cardio-routine-vivienne-vo-debut",
+                "posterUrl": "https://xmoviescdn.online/2026/05/exxxtrasmall-vivienne-vo-pocket-sized-pussy-for-your-cardio-routine-vivienne-vo-debut-xmoviesforyou-6a143a795d1e0.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[DredXXX] Lulu Chu (Round 2 Full Romp / 05.25.2026)",
+                "url": "https://xmoviesforyou.com/dredxxx-lulu-chu-round-2-full-romp",
+                "posterUrl": "https://xmoviescdn.online/2026/05/dredxxx-lulu-chu-round-2-full-romp-xmoviesforyou-6a1436578a529.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[AnalOnly] Scarlett Alexis (Scarlett Always Gets Her Way / 05.23.2026)",
+                "url": "https://xmoviesforyou.com/analonly-scarlett-alexis-scarlett-always-gets-her-way",
+                "posterUrl": "https://xmoviescdn.online/2026/05/analonly-scarlett-alexis-scarlett-always-gets-her-way-xmoviesforyou-6a1271a6c80ff.webp",
+                "type": "movie"
+            },
+            {
+                "title": "[PornstarWife] Alyssia Vera (33820 / 05.27.2026)",
+                "url": "https://xmoviesforyou.com/pornstarwife-alyssia-vera-33820",
+                "posterUrl": "https://xmoviescdn.online/2026/05/pornstarwife-alyssia-vera-33820-xmoviesforyou-6a16d3a89fe9e.webp",
+        
+        const data = {
+            "Home": extractedItems,
+            "Most Viewed": extractedItems.slice(0, 5), // Testing ke liye items divide kar diye
+            "Top Rated": extractedItems.slice(5, 10),
+            "Teen": extractedItems,
+            "MILF": extractedItems,
+            "Anal": extractedItems,
+            "Lesbian": extractedItems
+        };
+
+     cb({ success: true, data });
+
+    } catch (e) {
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
+}
 
     async function load(url, cb) {
         try {
