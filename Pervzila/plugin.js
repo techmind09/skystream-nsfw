@@ -1,10 +1,10 @@
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:151.0) Gecko/20100101 Firefox/151.0",
-        "Accept": '*/*',
+        "Accept": text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://tube.perverzija.com/"
-    };
+        "Referer": "https://tube.perverzija.com"
+    }"
 
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
@@ -18,8 +18,8 @@
             const altText = match[3];
             
             const title = altText.split('(')[0].trim();
-            const fullUrl = href.startsWith('http') ? href : (manifest.baseUrl || "https://tube.perverzija.com/") + href;
-            const posterUrl = posterSrc.startsWith('http') ? posterSrc : (manifest.baseUrl || "https://tube.perverzija.com/") + posterSrc;
+            const fullUrl = href.startsWith('http') ? href : (manifest.baseUrl || "https://tube.perverzija.com") + href;
+            const posterUrl = posterSrc.startsWith('http') ? posterSrc : (manifest.baseUrl || "https://tube.perverzija.com") + posterSrc;
             
             if (title && href) {
                 items.push(new MultimediaItem({
@@ -36,7 +36,7 @@
 
     async function getHome(cb) {
         try {
-            const baseUrl = manifest.baseUrl || "https://tube.perverzija.com/";
+            const baseUrl = manifest.baseUrl || "https://tube.perverzija.com";
             const categories = {
                 "All Studios": `${baseUrl}/studios/`,
     "AdultTime": `${baseUrl}/studio/adulttime/`,
@@ -80,7 +80,7 @@
 
     async function search(query, cb) {
         try {
-            const baseUrl = manifest.baseUrl || "https://youperv.com";
+            const baseUrl = manifest.baseUrl || "https://tube.perverzija.com"
             const searchUrl = `${baseUrl}/index.php?do=search&subaction=search&story=${encodeURIComponent(query)}`;
             const res = await http_get(searchUrl, HEADERS);
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
