@@ -96,7 +96,7 @@
             if (descMatch) description = descMatch[1].replace(/<[^>]+>/g, '').trim();
             
             const tags = [];
-            const tagPattern = /<a[^>]*href="[^"]*xfsearch[^"]*"[^>]*>([^<]+)<\/a>/gi;
+            const tagPattern = /<a[^>]*href="[^"]*(categories|tags|pornstars|studios)[^"]*"[^>]*>([^<]+)<\/a>/gi;
             let tagMatch;
             while ((tagMatch = tagPattern.exec(html)) !== null) {
                 tags.push(tagMatch[1].trim());
