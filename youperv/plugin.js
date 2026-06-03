@@ -4,6 +4,8 @@
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://youperv.com/"
+          "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate, br"
     };
 
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
