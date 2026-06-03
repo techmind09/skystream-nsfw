@@ -143,13 +143,13 @@
             const html = res.body || "";
             const streams = [];
             
-            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
+            const iframePattern = /<h3[^>]*>([\s\S]*?)<\/h3>/gi;
             let match;
             while ((match = iframePattern.exec(html)) !== null) {
                 const iframeUrl = match[1];
                 if (iframeUrl.includes('player') || iframeUrl.includes('video') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4') || iframeUrl.includes('.m3u8')) {
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
+                        url: "MAGIC_PROXY_v1" + btoa(<h3Url),
                         source: "Xmoviesforyou",
                         headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
