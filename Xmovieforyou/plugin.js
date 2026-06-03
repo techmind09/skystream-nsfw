@@ -92,7 +92,7 @@
             if (posterMatch) poster = posterMatch[1];
             
             let description = "";
-            const descMatch = html.match(/<div class="f-desc"[^>]*>([\s\S]*?)<\/div>/i);
+            const descMatch = html.match(/<(div|p)[^>]*class="[^"]*desc[^"]*"[^>]*>([\s\S]*?)<\/\1>/i) || html.match(/<(div|p)[^>]*>([\s\S]*?)<\/\1>/i);
             if (descMatch) description = descMatch[1].replace(/<[^>]+>/g, '').trim();
             
             const tags = [];
