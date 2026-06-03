@@ -103,8 +103,7 @@
             }
             
             let duration = null;
-            const durationMatch = html.match(/<span[^>]*class="[^"]*duration[^"]*"[^>]*>([^<]+)<\/span>/i) || 
-                                  html.match(/<i[^>]*class="[^"]*fa-clock-o[^"]*"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i);
+            const durationMatch = const durationMatch = html.match(/(?:duration|time)[^>]*>([\d:]+)</i) || html.match(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/);
             if (durationMatch) {
                 const text = durationMatch[1].trim();
                 if (text.includes(':')) {
