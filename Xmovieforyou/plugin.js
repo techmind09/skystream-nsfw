@@ -3,16 +3,14 @@
         "User-Agent": "Mozilla/5.0 (Linux; Android 15; Infinix X6851 Build/AP3A.240905.015.A2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/148.0.7778.178 Mobile Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
         "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://xmoviesforyou.com/"
-          'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
+        "Referer": "https://xmoviesforyou.com"
     };
 
     function parseVideoItems(html) {
         const items = [];
         // Updated Regex for safety
 
-        const itemPattern = /<div class="flex items-center gap-3 md:gap-4"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/
+        const itemPattern = /<div class="a.group.flex.flex-col"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/
 
 
         let match;
@@ -149,7 +147,7 @@
                 const iframeUrl = match[1];
                 if (iframeUrl.includes('player') || iframeUrl.includes('video') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4') || iframeUrl.includes('.m3u8')) {
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(<h3Url),
+                        url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
                         source: "Xmoviesforyou",
                         headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
@@ -163,7 +161,7 @@
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Video",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        headers: { "Referer": "https://xmoviesforyou.com", "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
@@ -175,7 +173,14 @@
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Direct",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        headers: { "Referer":"https://xmoviesforyou.com", "User-Agent": HEADERS["User-Agent"] }
+                return new StreamResult({
+                    url: proxyUrl,
+                    source: stream.quality,  // Use 'source' not 'quality' for display
+                    headers: {
+                        "Referer": "https://xmoviesforyou.com",
+                        "User-Agent": HEADERS["User-Agent"]
+                        
                     }));
                 }
             }
@@ -191,7 +196,7 @@
     }
 
     globalThis.getHome = getHome;
-    // globalThis.search = search; 
+    globalThis.search = search; 
     globalThis.load = load;
     globalThis.loadStreams = loadStreams;
 })();
