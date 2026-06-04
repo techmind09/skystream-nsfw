@@ -253,12 +253,11 @@
                 });
             });
             
-            cb({ success: true, data: streams });
-        } catch (e) {
-            console.error("loadStreams error: " + e.message);
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
-        }
+            cb({ success: true, data: finalStreams });
+    } catch (e) {
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
+}
 
     // Export functions to SkyStream
     globalThis.getHome = getHome;
