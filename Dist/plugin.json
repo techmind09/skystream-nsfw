@@ -1,0 +1,19 @@
+{
+    "packageName": "com.skystream-nsfw.xprimehub",
+    "name": "Xprimehub",
+    "version": 1,
+    "baseUrl": "https://xprimehub.hair/",
+    "description": "Xprimehub Site for 18+",
+    "isAdult": true,
+    "authors": [
+      "Cookie🍪"
+    ],
+    "languages": [
+      "en"
+    ],
+    "categories": [
+      "Adult"
+    ],
+    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw/xprimehub.sky"
+  }
+]
