@@ -7,4 +7,5 @@
   "authors": ["techmind09"],
   "languages": ["en"],
   "categories": ["NSFW"],
+  "isAdult": true
 }
