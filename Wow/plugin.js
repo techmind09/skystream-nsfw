@@ -25,7 +25,7 @@
     function parseVideoItems(html) {
         const items = [];
         // Match video items using regex patterns
-        const itemPattern = /<div class="item">[\s\S]*?<a href="(https:\/\/www\.wow\.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
+        const itemPattern = /<div class="item">[\s\S]*?<a href="(https:www.wow.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
@@ -46,7 +46,7 @@
         
         // Fallback: try simpler pattern if first one doesn't match enough items
         if (items.length === 0) {
-            const simplePattern = /<a href="(https:\/\/www\.wow\.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"/g;
+            const simplePattern = /<a href="(https:www.wow.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"/g;
             while ((match = simplePattern.exec(html)) !== null) {
                 const url = match[1];
                 const posterUrl = match[2];
