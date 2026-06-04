@@ -228,29 +228,27 @@
             }
             
             const html = res.body || "";
-            const rawStreams = parseVideoStreams(html);
+            const StreamsData = parseVideoStreams(html);
             
-            if (rawStreams.length === 0) {
+            if (StreamsData.length === 0) {
                 return cb({ success: false, errorCode: "NO_STREAMS", message: "No video streams found" });
             }
             
             // Convert to StreamResult objects with Magic Proxy for redirects
-            const streams = rawStreams.map(stream => {
+            const streams = StreamsData.map(stream => {
                 // Use Magic Proxy v1 to handle 302 redirects
                 // Format: MAGIC_PROXY_v1 + base64(url)
-                const base64Url = btoa(stream.url);
-                const proxyUrl = "MAGIC_PROXY_v1" + base64Url;
-                const source1 = { url: "https://voe.sx/xyz123" };
-                const source2 = { url: "https://streamtape.com/e/abc456" };
-                console.log(generateProxyLink(source1)); // Output: MAGIC_PROXY_v1aHR0cHM6Ly92b2Uuc3gveHl6MTIz
-                console.log(generateProxyLink(source2)); // Output: MAGIC_PROXY_v1aHR0cHM6Ly9zdHJlYW10YXBlLmNvbS9lL2FiYzQ1Ng==
+                streamsData.push({ url: "https://voe.sx/xyz123", quality: "Voe Server" });
+        streamsData.push({ url: "https://streamtape.com/e/abc456", quality: "Streamtape Server" });
                 
-                return new StreamResult({
-                    url: proxyUrl,
-                    source: stream.quality,  // Use 'source' not 'quality' for display
-                    headers: {
-                        "Referer": "https://www.wow.xxx/",
-                        "User-Agent": HEADERS["User-Agent"]
+                const finalStreams = streamsData.map(stream => {
+            const base64Url = btoa(stream.url);
+            return new StreamResult({
+                url: "MAGIC_PROXY_v1" + base64Url,
+                source: stream.quality,
+                headers: {
+                    "Referer": "https://www.wow.xxx/",
+                    "User-Agent": HEADERS["User-Agent"]
                     }
                 });
             });
