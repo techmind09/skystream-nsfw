@@ -240,6 +240,10 @@
                 // Format: MAGIC_PROXY_v1 + base64(url)
                 const base64Url = btoa(stream.url);
                 const proxyUrl = "MAGIC_PROXY_v1" + base64Url;
+                const source1 = { url: "https://voe.sx/xyz123" };
+                const source2 = { url: "https://streamtape.com/e/abc456" };
+                console.log(generateProxyLink(source1)); // Output: MAGIC_PROXY_v1aHR0cHM6Ly92b2Uuc3gveHl6MTIz
+                console.log(generateProxyLink(source2)); // Output: MAGIC_PROXY_v1aHR0cHM6Ly9zdHJlYW10YXBlLmNvbS9lL2FiYzQ1Ng==
                 
                 return new StreamResult({
                     url: proxyUrl,
