@@ -1,9 +1,0 @@
-{
-  "name": "Hungry",
-  "packageName": "com.techmind09.repo",
-  "description": "Few Plugins To Watch Anything From Anywhere",
-  "manifestVersion": 1,
-  "pluginLists": [
-    "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/plugins.json"
-  ]
-}
