@@ -199,8 +199,8 @@
         const streams = [];
         
         // Match source tags with their qualities
-        const sourcePattern = /<source\s+src=['"](https:\/\/www\.wow\.xxx\/get_file\/[^'"]+)['"][^>]*label=['"]([\w\d]+p?)['"][^>]*>/gi;
-        
+        const sourcePattern = /src=['"](https?:\/\/[^'"]+\.(mp4|m3u8|mov))['"]/gi;
+
         let match;
         while ((match = sourcePattern.exec(html)) !== null) {
             const url = match[1];
