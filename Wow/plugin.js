@@ -25,7 +25,7 @@
     function parseVideoItems(html) {
         const items = [];
         // Match video items using regex patterns
-        const itemPattern = /<div class="item">[\s\S]*?<a href="(https:www.wow.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
+        const itemPattern = /<div class="item">[\s\S]*?<a href="(https:\/\/www.\wow\xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
