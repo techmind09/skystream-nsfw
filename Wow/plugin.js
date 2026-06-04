@@ -254,7 +254,7 @@
             });
             
             cb({ success: true, data: finalStreams });
-    } catch (e) {
+            } catch (e) {
         cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
 }
