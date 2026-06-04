@@ -239,20 +239,17 @@
                 // Use Magic Proxy v1 to handle 302 redirects
                 // Format: MAGIC_PROXY_v1 + base64(url)
                 streamsData.push({ url: "https://voe.sx/xyz123", quality: "Voe Server" });
-        streamsData.push({ url: "https://streamtape.com/e/abc456", quality: "Streamtape Server" });
+                streamsData.push({ url: "https://streamtape.com/e/abc456", quality: "Streamtape Server" });
+               
+           return new StreamResult({
+               url: stream.url,
+               source: stream.quality,
+               headers: {
+              "Referer": "https://www.wow.xxx/",
+              "User-Agent": HEADERS["User-Agent"]
+            }
+         });
                 
-                const finalStreams = streamsData.map(stream => {
-            const base64Url = btoa(stream.url);
-            return new StreamResult({
-                url: "MAGIC_PROXY_v1" + base64Url,
-                source: stream.quality,
-                headers: {
-                    "Referer": "https://www.wow.xxx/",
-                    "User-Agent": HEADERS["User-Agent"]
-                    }
-                });
-            });
-            
             cb({ success: true, data: finalStreams });
             } catch (e) {
         cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
