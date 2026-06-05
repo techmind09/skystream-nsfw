@@ -208,7 +208,7 @@
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
-
+    
     globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
