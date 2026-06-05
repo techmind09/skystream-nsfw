@@ -158,7 +158,7 @@
             
             // Direct video file link
             if (streams.length === 0) {
-                const directPattern = /href="([^"]+\.mp4/.m3u8/.video/.embed)"[^>]*>/gi;
+                const directPattern = /href="([^"]+\.mp4)"[^>]*>/gi;
                 while ((match = directPattern.exec(html)) !== null) {
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
