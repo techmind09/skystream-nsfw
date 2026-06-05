@@ -70,16 +70,10 @@
             const baseUrl = manifest.baseUrl || "https://xprimehub.hair";
             const categories = {
                 "Latest Releases": `${baseUrl}/`,
-                "Hindi Dubbed": `${baseUrl}/hindi-dubbed/`,
                 "Brazzers Collection": `${baseUrl}/by-genres/brazzers/`,
                 "OnlyFans Content": `${baseUrl}/onlyfans/`,
-                "HotX Originals": `${baseUrl}/hotx-originals/`,
-                "Kooku Hot Premium": `${baseUrl}/kooku/`,
-                "Ullu Originals Row": `${baseUrl}/ullu-originals/`,
-                "Dual Audio Movies": `${baseUrl}/dual-audio/`,
                 "Sexmex Video Links": `${baseUrl}/sexmex/`,
                 "NiksIndian Network": `${baseUrl}/niksindian/`,
-                "Tagalog Updates": `${baseUrl}/tagalog/`
             };
             
             const data = {};
@@ -202,9 +196,9 @@
                     if (serverLabel.toLowerCase().includes("g-direct")) serverLabel = "⚡ G-Direct [Instant]";
                     else if (serverLabel.toLowerCase().includes("v-cloud")) serverLabel = "🔥 V-Cloud [Resumable]";
                     else if (serverLabel.toLowerCase().includes("filepress")) serverLabel = "📁 Filepress [G-Drive]";
-                    else if (serverUrl.includes("filepress")) serverLabel = "📁 Filepress Server Link";
-                    else if (serverUrl.includes("vcloud")) serverLabel = "🔥 V-Cloud Server Link";
-                    else if (serverUrl.includes("fastdl")) serverLabel = "⚡ FastDL Server Link";
+                    else if (serverUrl.includes("filepress")) serverLabel = "Filepress Server Link";
+                    else if (serverUrl.includes("vcloud")) serverLabel = "V-Cloud Server Link";
+                    else if (serverUrl.includes("fastdl")) serverLabel = "FastDL Server Link";
 
                     cloudStreams.push({
                         url: serverUrl,
