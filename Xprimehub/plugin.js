@@ -1,7 +1,7 @@
 /**
  * Xprimehub.hair Plugin for SkyStream
  * Source: https://xprimehub.hair
- * Features: Latest Updates, Most Popular (Today/Week/All), Search, Video Streams
+ * Features: Latest Updates, Categorized Navigation, Search, Video Streams (Buttons & Iframes)
  */
 
 (function () {
@@ -49,41 +49,49 @@
     }
 
     /**
-     * Get homepage content with menu categories
+     * Get homepage content with menu categories from screenshot
      * @param {Function} cb - Callback function
      */
     async function getHome(cb) {
         try {
             const baseUrl = manifest.baseUrl || "https://xprimehub.hair";
             
-            // Xprimehub current structural routes
+            // Categories mapping directly matched from your navigation menu bar screenshot
             const categories = {
-                "Latest Updates": `${baseUrl}/`,
-                "Page 2 Updates": `${baseUrl}/page/2/`
+                "Latest Releases": `${baseUrl}/`,
+                "Hindi Dubbed": `${baseUrl}/hindi-dubbed/`,
+                "Brazzers": `${baseUrl}/by-genres/brazzers/`,
+                "OnlyFans": `${baseUrl}/onlyfans/`,
+                "HotX Originals": `${baseUrl}/hotx-originals/`,
+                "Kooku": `${baseUrl}/kooku/`,
+                "Ullu Originals": `${baseUrl}/ullu-originals/`,
+                "Dual Audio": `${baseUrl}/dual-audio/`,
+                "Sexmex": `${baseUrl}/sexmex/`,
+                "NiksIndian": `${baseUrl}/niksindian/`
             };
             
             const data = {};
             
-            // Fetch each category
+            // Fetch each category concurrently or sequentially
             for (const [categoryName, url] of Object.entries(categories)) {
                 try {
                     const res = await http_get(url, HEADERS);
                     if (res.status === 200 && res.body) {
                         const items = parseVideoItems(res.body);
                         if (items.length > 0) {
-                            data[categoryName] = items.slice(0, 20); // Limit to 20 items per category
+                            data[categoryName] = items.slice(0, 20); // Limit to 20 items per row
                         }
                     }
                 } catch (e) {
-                    console.error(`Error fetching ${categoryName}: ${e.message}`);
+                    console.error(`Error fetching category [${categoryName}]: ${e.message}`);
                 }
             }
             
-            // Fallback strategy if custom loops fail
+            // Fallback strategy if dynamic loops return empty data
             if (Object.keys(data).length === 0) {
                 const res = await http_get(baseUrl, HEADERS);
                 if (res.status === 200 && res.body) {
-                    data["Latest"] = parseVideoItems(res.body).slice(0, 20);
+                    data["Latest Releases"] = parseVideoItems(res.body).slice(0, 20);
                 }
             }
             
@@ -95,7 +103,7 @@
     }
 
     /**
-     * Search for videos
+     * Search for videos using WP default engine structure
      * @param {string} query - Search query
      * @param {Function} cb - Callback function
      */
@@ -134,15 +142,15 @@
             
             const html = res.body || "";
             
-            // Extract title
+            // Extract title cleanly
             const titleMatch = html.match(/<title>([^<]+)<\/title>/);
             const title = titleMatch ? titleMatch[1].replace(/\s*-\s*XprimeHub.*$/i, '').trim() : "Unknown Movie";
             
-            // Extract poster inside the inner page template
+            // Extract poster inside the inner template using meta tag
             const posterMatch = html.match(/<meta property="og:image" content="([^"]+)"/) || html.match(/src="([^"]+\.(?:jpg|jpeg|png))"/);
             const posterUrl = posterMatch ? posterMatch[1] : "";
             
-            // Create episode with the video page URL
+            // Create episode wrapper
             const episode = new Episode({
                 name: "Play Movie",
                 url: url,  
@@ -168,30 +176,40 @@
     }
 
     /**
-     * Parse stream URLs or iFrames from individual post page
+     * Multi-layer adaptive stream parsing (Handles Direct Links, Buttons, and Video Iframes)
      * @param {string} html - The HTML content of video page
      * @returns {Array} Array of objects with url and quality
      */
     function parseVideoStreams(html) {
         const streams = [];
         
-        // Pattern 1: Catching Iframe streaming players (Doodstream, Player, etc.)
-        const iframePattern = /<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
+        // Layer 1: Target anchor buttons with stream, download, or server properties
+        const btnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
         let match;
-        while ((match = iframePattern.exec(html)) !== null) {
-            const srcUrl = match[1];
-            if (srcUrl && !srcUrl.includes("ads")) {
-                streams.push({ url: srcUrl, quality: "Stream Embed Player" });
+        
+        while ((match = btnPattern.exec(html)) !== null) {
+            const url = match[1];
+            const text = match[2].replace(/<[^>]*>/g, '').trim().toLowerCase(); // Clean internal HTML tags
+            
+            // Filter link structures related to target media assets
+            if (url && (url.includes('download') || url.includes('stream') || url.includes('drive') || url.includes('server') || url.includes('player'))) {
+                let label = "Stream / Download Link";
+                if (text.includes("720p")) label = "Server (720p)";
+                else if (text.includes("1080p")) label = "Server (1080p)";
+                else if (text.includes("480p")) label = "Server (480p)";
+                else if (text.length > 0 && text.length < 30) label = `Server (${match[2].replace(/<[^>]*>/g, '').trim()})`;
+                
+                streams.push({ url: url, quality: label });
             }
         }
         
-        // Pattern 2: Catching source streams if direct links are available
-        const sourcePattern = /<source\s+src=['"](https?:\/\/[^'"]+)['"][^>]*label=['"]([\w\d]+p?)['"]/gi;
-        while ((match = sourcePattern.exec(html)) !== null) {
-            const url = match[1];
-            const quality = match[2] || "HD";
-            if (url) {
-                streams.push({ url, quality });
+        // Layer 2: Fallback to embedded players if hyperlinks are missing
+        const iframePattern = /<iframe[^>]+src=["'](https?:\/\/[^"']+)["']/gi;
+        while ((match = iframePattern.exec(html)) !== null) {
+            const srcUrl = match[1];
+            // Eliminate script proxies or tracker interfaces
+            if (srcUrl && !srcUrl.includes("ads") && !srcUrl.includes("adscore")) {
+                streams.push({ url: srcUrl, quality: "Stream Player (Embed)" });
             }
         }
         
@@ -218,6 +236,7 @@
                 return cb({ success: false, errorCode: "NO_STREAMS", message: "No stream player or download links found" });
             }
             
+            // Map streams using standard platform encryption structure
             const streams = rawStreams.map(stream => {
                 const base64Url = btoa(stream.url);
                 const proxyUrl = "MAGIC_PROXY_v1" + base64Url;
@@ -239,7 +258,7 @@
         }
     }
 
-    // Export functions to SkyStream
+    // Export functions globally to SkyStream environment
     globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
