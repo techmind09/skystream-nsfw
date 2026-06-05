@@ -250,7 +250,7 @@
                     url: "MAGIC_PROXY_v1" + btoa(server.url),
                     source: server.quality,
                     isHtml: true,                // FORCES SkyStream to load the cloud bypass container smoothly
-                    useExternalBrowser: false,   // Keeps the interaction wrapped internally inside SkyStream sandbox
+                    useExternalBrowser: true,   // Keeps the interaction wrapped internally inside SkyStream sandbox
                     headers: { 
                         "Referer": url, 
                         "User-Agent": HEADERS["User-Agent"] 
