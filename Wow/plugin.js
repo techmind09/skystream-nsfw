@@ -9,7 +9,7 @@
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
         const items = [];
-        const itemPattern =  /<div class="item">[\s\S]*?<a href="(https:\/\/www\.wow\.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
+        const itemPattern =  /<div class="item">[\s\S]*?<a href="(https:\.www\.wow\.xxx\/videos\.[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\div>/g;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
@@ -43,13 +43,7 @@
                 "Most Popular Week": `${baseUrl}/most-popular/week/`,
                 "Most Popular Model": `${https://www.wow.xxx/models/}/most-popular/models/`, 
                 "Categories All": `${https://www.wow.xxx/categories/}/categories/all/`,
-                "18 Years Old": `${baseUrl}/18-years-old/`,
-                "19 Years Old": `${baseUrl}/19-years-old/`,
-                "4th of July": `${baseUrl}/4th-of-july/`,
-                "50+": `${baseUrl}/50-plus/`,
-                "60+": `${baseUrl}/60-plus/`,
-                "69": `${baseUrl}/69/`,
-                "Acoustic Intimacy": `${baseUrl}/acoustic-intimacy/`,
+               "Acoustic Intimacy": `${baseUrl}/acoustic-intimacy/`,
                 "African": `${baseUrl}/african/`,
                 "Amateur": `${baseUrl}/amateur/`,
                 "Amsterdam": `${baseUrl}/amsterdam/`,
