@@ -84,71 +84,37 @@
             const html = res.body || "";
             
             // Try multiple patterns for title
-            let title = "Unknown";
+                 // Extract title
+            const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+            const title = titleMatch ? titleMatch[1].replace(/\s*-\s*WOW\.XXX$/, '').trim() : "Unknown";
             
-            // Pattern 1: <h1 class="video-title">TITLE</h1>
-            let titleMatch = html.match;replace(/\s*-\s*WOW\.XXX$/, '').trim() : "Unknown";
-
-            if (!titleMatch) {
-                // Pattern 2: <h1>TITLE</h1> 
-                titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-            }
-            if (!titleMatch) {
-                // Pattern 3: <title>TITLE</title>
-                titleMatch = html.match(/<title>([^<]+)<\/title>/i);
-            }
-            if (titleMatch) title = titleMatch[1].trim();
+            // Extract poster
+            const posterMatch = html.match(/poster='([^']+)'/);
+            const posterUrl = posterMatch ? posterMatch[1] : "";
             
-            // Get poster from meta og:image
-            let poster = "";
-            const posterMatch = html.match(/<meta property="og:image" content="([^"]+)"/i);
-            if (posterMatch) poster = posterMatch[1];
-            
-            // Get description
-            let description = "";
-            const descMatch = html.match(/<div class="f-desc"[^>]*>([\s\S]*?)<\/div>/i);
-            if (descMatch) description = descMatch[1].replace(/<[^>]+>/g, '').trim();
-            
-            // Get tags
-            const tags = [];
-            const tagPattern = /<a[^>]*href="[^"]*xfsearch[^"]*"[^>]*>([^<]+)<\/a>/gi;
-            let tagMatch;
-            while ((tagMatch = tagPattern.exec(html)) !== null) {
-                tags.push(tagMatch[1].trim());
-            }
-            
-            // Get duration from span that contains clock icon
-            let duration = null;
-            const durationMatch1 = html.match(/<span[^>]*class="[^"]*duration[^"]*"[^>]*>([^<]+)<\/span>/i);
-            const durationMatch2 = html.match(/<i[^>]*class="[^"]*fa-clock-o[^"]*"[^>]*>[\s\S]*?<span[^>]*>([^<]+)<\/span>/i);
-            const durationMatch = durationMatch1 || durationMatch2;
-            if (durationMatch) {
-                const text = durationMatch[1].trim();
-                if (text.includes(':')) {
-                    const parts = text.split(':');
-                    if (parts.length === 2) {
-                        duration = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
-                    }
-                }
-            }
-            
+            // Create episode with the video page URL
+            // When user clicks this episode, loadStreams will be called with this URL
             const episode = new Episode({
                 name: "Play Video",
-                url: url,
+                url: url,  // This URL will be passed to loadStreams
                 season: 1,
                 episode: 1,
-                posterUrl: poster
+                posterUrl: posterUrl
             });
             
-            cb({
-                success: true,
-                data: new MultimediaItem({
-                    title, url, posterUrl: poster, type: "movie", isAdult: true,
-                    description, tags, duration: duration ? { length: duration, format: "minutes" } : undefined,
-                    episodes: [episode]
-                })
+            // Create MultimediaItem with episodes array
+            const item = new MultimediaItem({
+                title: title,
+                url: url,
+                posterUrl: posterUrl,
+                type: "movie",
+                isAdult: true,
+                episodes: [episode]  // THIS IS REQUIRED FOR PLAY BUTTON TO APPEAR
             });
+            
+            cb({ success: true, data: item });
         } catch (e) {
+            console.error("load error: " + e.message);
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
