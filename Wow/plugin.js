@@ -48,15 +48,15 @@
                  "50+": `${baseUrl}/50-plus/`,
                  "60+": `${baseUrl}/60-plus/`,
                   "69": `${baseUrl}/69/`,
-                   "Acoustic Intimacy": `${baseUrl}/acoustic-intimacy/`,
-    "African": `${baseUrl}/african/`,
-    "Amateur": `${baseUrl}/amateur/`,
-    "Amsterdam": `${baseUrl}/amsterdam/`,
-    "Anal": `${baseUrl}/anal/`,
-    "Anal Creampie": `${baseUrl}/anal-creampie/`,
-    "Anal Play": `${baseUrl}/anal-play/`,
-    "Animation": `${baseUrl}/animation/`,
-    "Arab": `${baseUrl}/arab/`,
+                 "Acoustic Intimacy": `${baseUrl}/acoustic-intimacy/`,
+                 "African": `${baseUrl}/african/`,
+                 "Amateur": `${baseUrl}/amateur/`,
+                 "Amsterdam": `${baseUrl}/amsterdam/`,
+                "Anal": `${baseUrl}/anal/`,
+                "Anal Creampie": `${baseUrl}/anal-creampie/`,
+                "Anal Play": `${baseUrl}/anal-play/`,
+                "Animation": `${baseUrl}/animation/`,
+                "Arab": `${baseUrl}/arab/`,
     "Asian": `${baseUrl}/asian/`,
     "Ass Fingering": `${baseUrl}/ass-fingering/`,
     "Ass Licking": `${baseUrl}/ass-licking/`,
@@ -180,7 +180,8 @@
     "Finger Licking": `${baseUrl}/finger-licking/`,
     "Fingering": `${baseUrl}/fingering/`,
     "First Anal": `${baseUrl}/first-anal/`,
-    "First Time Porn": `${baseUrl}/first-time-porn/`,
+
+        "First Time Porn": `${baseUrl}/first-time-porn/`,
     "First Time Sex": `${baseUrl}/first-time-sex/`,
     "Fishnet": `${baseUrl}/fishnet/`,
     "Fisting": `${baseUrl}/fisting/`,
@@ -480,7 +481,7 @@
                         url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
                         source: "Wow",
                         headers: { "Referer": "https://www.wow.xxx", 
- "User-Agent": HEADERS["User-Agent"] }
+                       "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
@@ -507,7 +508,7 @@
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Direct",
                         headers: { "Referer": ",https://www.wow.xxx", 
-"User-Agent": HEADERS["User-Agent"] }
+                       "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
