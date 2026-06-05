@@ -149,7 +149,7 @@
                 while ((match = videoPattern.exec(html)) !== null) {
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(videoUrl/.mp4url/.m3u8url/.embedurl),
+                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Video",
                         headers: { "Referer": "https://www.wow.xxx", "User-Agent": HEADERS["User-Agent"] }
                     }));
@@ -162,7 +162,7 @@
                 while ((match = directPattern.exec(html)) !== null) {
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
-                        url: "MAGIC_PROXY_v1" + btoa(videoUrl/.m3u8/.mp4/.embed),
+                        url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Direct",
                         headers: { "Referer": ",https://www.wow.xxx", 
 "User-Agent": HEADERS["User-Agent"] }
