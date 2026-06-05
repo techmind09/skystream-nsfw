@@ -41,7 +41,7 @@
                 "Latest Updates": `${baseUrl}/latest-updates/`,
                 "Most Popular Today": `${baseUrl}/most-popular/today/`,
                 "Most Popular Week": `${baseUrl}/most-popular/week/`,
-                "Most Popular All": `${baseUrl}/most-popular/all/`
+                "Most Popular All": `${baseUrl}/most-popular/all/`, 
                 "18 Years Old": `${baseUrl}/18-years-old/`,
     "19 Years Old": `${baseUrl}/19-years-old/`,
     "4th of July": `${baseUrl}/4th-of-july/`,
