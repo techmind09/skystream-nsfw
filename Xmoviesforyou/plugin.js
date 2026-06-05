@@ -65,7 +65,6 @@
             
             // Image ke static grid layout ke hisab se top categories ki mapping
             const categories = {
-                "Latest Videos": `${baseUrl}/`,
                 "Brunette": `${baseUrl}/categories/brunette`,
                 "Blonde": `${baseUrl}/categories/blonde`,
                 "Teen": `${baseUrl}/categories/teen`,
@@ -143,7 +142,7 @@
             const html = res.body || "";
             
             const titleMatch = html.match(/<title>([^<]+)<\/title>/) || html.match(/<h3[^>]*>([^<]+)<\/h3>/);
-            let title = titleMatch ? titleMatch[1].replace(/\s*-\s*XMovies.*$/i, '').trim() : "Unknown Video";
+            let title = titleMatch ? titleMatch[1].replace(/\s*-\s*XMoviesforyou.*$/i, '').trim() : "Unknown Video";
             title = title.replace(/\[.*?\]/g, '').trim(); 
             
             const posterMatch = html.match(/src=["'](https:\/\/xmoviescdn\.online\/[^"']+\.webp)["']/i) || html.match(/<meta property="og:image" content="([^"]+)"/);
@@ -254,7 +253,7 @@
                         source: `XCDN Server Node ${i + 1}`,
                         isHtml: directUrl.includes('iframe') || !directUrl.match(/\.(mp4|m3u8)/i), 
                         headers: {
-                            "Referer": targetUrl,
+                            "Referer": "https://xmoviesforyou.com,
                             "User-Agent": HEADERS["User-Agent"]
                         }
                     }));
