@@ -251,14 +251,15 @@
          });
                 
             cb({ success: true, data: finalStreams });
-            } catch (e) {
-        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+            }
+        } catch (e) {
+            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+        }
     }
-}
 
     // Export functions to SkyStream
     globalThis.getHome = getHome;
     globalThis.search = search;
     globalThis.load = load;
     globalThis.loadStreams = loadStreams;
-})();
+ })();
