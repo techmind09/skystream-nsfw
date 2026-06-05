@@ -228,13 +228,13 @@
      * @param {string} url - Video page URL
      * @param {Function} cb - Callback function
      */
-    async function loadStreams(url, cb) {
+        async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
             const html = res.body || "";
-            const rawStreams = extractAgressiveStreams(html, url);
+            const rawStreams = parseCloudServerButtons(html); // Aapke page ke buttons extract karega
             
             if (rawStreams.length === 0) {
                 return cb({ success: false, errorCode: "NO_STREAMS" });
@@ -242,11 +242,22 @@
             
             // Map matching entries into formalized secure formats
             const streams = rawStreams.map(stream => {
+                // Dynamic Referer setup: Jis domain ka link hoga, wahi referer automatic set ho jayega
+                let dynamicReferer = url; 
+                if (stream.url.includes("filepress")) {
+                    dynamicReferer = "https://new5.filepress.wiki/";
+                } else if (stream.url.includes("vcloud")) {
+                    dynamicReferer = "http://vcloud.zip/";
+                } else if (stream.url.includes("fastdl")) {
+                    dynamicReferer = "http://fastdl.zip/";
+                }
+
                 return new StreamResult({
                     url: "MAGIC_PROXY_v1" + btoa(stream.url),
                     source: stream.quality,
+                    isHtml: false, // In direct download cloud servers ke liye false hi rakhein
                     headers: { 
-                        "Referer": url, 
+                        "Referer": dynamicReferer,
                         "User-Agent": HEADERS["User-Agent"] 
                     }
                 });
