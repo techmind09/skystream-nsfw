@@ -1,7 +1,7 @@
 (function () {
     const HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.5",
         "Referer": "https://allpornstream.com/"
     };
@@ -9,7 +9,7 @@
     // Based on REAL HTML: <div class="item"><a href="URL" class="item-link"><img src="SRC" alt="TITLE">
     function parseVideoItems(html) {
         const items = [];
-        const itemPattern = /<div class="item"[^>]*>[\s\S]*?<a[^>]*href="([^"]+)"[^>]*class="item-link"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*>/gi;
+        const itemPattern =  /<div class="item">[\s\S]*?<a href="(https:/allstreampron\.com\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)"[\s\S]*?<\/div>/g;
         
         let match;
         while ((match = itemPattern.exec(html)) !== null) {
@@ -38,10 +38,12 @@
         try {
             const baseUrl = manifest.baseUrl || "https://allpornstream.com";
             const categories = {
-                "Home": baseUrl,
-                "Most Viewed": `${baseUrl}/top-50-most-viewed-videos.html`,
-                "Top Rated": `${baseUrl}/top-porn-videos.html`
+                "Latest Updates": `${baseUrl}/latest-updates/`,
+                "Most Popular Today": `${baseUrl}/most-popular/today/`,
+                "Most Popular Week": `${baseUrl}/most-popular/week/`,
+                "Most Popular All": `${baseUrl}/most-popular/all/`
             };
+            
             
             const data = {};
             for (const [name, url] of Object.entries(categories)) {
@@ -85,7 +87,8 @@
             let title = "Unknown";
             
             // Pattern 1: <h1 class="video-title">TITLE</h1>
-            let titleMatch = html.match(/<h1[^>]*class="[^"]*video-title[^"]*"[^>]*>([^<]+)<\/h1>/i);
+            let titleMatch = html.match;replace(/\s*-\s*ALLSTREAMPRON\.COM$/, '').trim() : "Unknown";
+
             if (!titleMatch) {
                 // Pattern 2: <h1>TITLE</h1> 
                 titleMatch = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
@@ -167,8 +170,9 @@
                 if (iframeUrl.includes('player') || iframeUrl.includes('video') || iframeUrl.includes('embed') || iframeUrl.includes('.mp4') || iframeUrl.includes('.m3u8')) {
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
-                        source: "Allpronstream",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        source: "Allstreampron",
+                        headers: { "Referer": "https://allpornstream.com", 
+ "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
@@ -181,7 +185,8 @@
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Video",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        headers: { "Referer": "https://allpornstream.com", 
+"User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
@@ -194,7 +199,8 @@
                     streams.push(new StreamResult({
                         url: "MAGIC_PROXY_v1" + btoa(videoUrl),
                         source: "Direct",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                        headers: { "Referer": ",https://allpornstream.com", 
+"User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
