@@ -1,10 +1,11 @@
 [
   {
-    "packageName": "com.skystream-nsfw.wowxxx",
-    "name": "Wowxxx",
+    "packageName": "com.skystream-nsfw.allpronstream",
+    "name": "Allpronstream",
     "version": 1,
-    "baseUrl": "https://www.wow.xxx",
-    "description": "Free Premium Porn Movies in Full Length from biggest Premium Porn Sites: MYLF, Brazzers, BLACKED, TeamSkeet and many more!",
+    "baseUrl": "https://allpornstream.com",
+    "description": "Allpronstream Site for 18+",
+    "isAdult": true,
     "authors": [
       "techmind09"
     ],
@@ -12,10 +13,9 @@
       "en"
     ],
     "categories": [
-      "NSFW"
+      "Adult"
     ],
-    "isAdult": true,
-    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.wowxxx.sky"
+    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.allpronstream.sky"
   },
   {
     "packageName": "com.skystream-nsfw",
@@ -36,12 +36,11 @@
     "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.sky"
   },
   {
-    "packageName": "com.skystream-nsfw.youperv",
+    "packageName": "com.skystream-nsfw",
     "name": "Youperv",
     "version": 1,
     "baseUrl": "https://youperv.com",
-    "description": "Youperv Site for 18+",
-    "isAdult": true,
+    "description": "Free Premium Porn Movies in Full Length from biggest Premium Porn Sites: MYLF, Brazzers, BLACKED, TeamSkeet and many more!",
     "authors": [
       "techmind09"
     ],
@@ -49,8 +48,9 @@
       "en"
     ],
     "categories": [
-      "Adult"
+      "NSFW"
     ],
-    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.youperv.sky"
+    "isAdult": true,
+    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.sky"
   }
 ]
