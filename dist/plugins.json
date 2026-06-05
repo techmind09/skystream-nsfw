@@ -34,5 +34,23 @@
     ],
     "isAdult": true,
     "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.sky"
+  },
+  {
+    "packageName": "com.skystream-nsfw.youperv",
+    "name": "Youperv",
+    "version": 1,
+    "baseUrl": "https://youperv.com",
+    "description": "Youperv Site for 18+",
+    "isAdult": true,
+    "authors": [
+      "techmind09"
+    ],
+    "languages": [
+      "en"
+    ],
+    "categories": [
+      "Adult"
+    ],
+    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.youperv.sky"
   }
 ]
