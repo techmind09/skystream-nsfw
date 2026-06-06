@@ -64,21 +64,21 @@
             const baseUrl = manifest.baseUrl || "https://allpornstream.com";
             
             const categories = [
-                { title: "Brunette", url: `${baseUrl}/categories/brunette` },
-                { title: "1080 P", url: `${baseUrl}/categories/1080-p` },
-                { title: "Shaved Pussy", url: `${baseUrl}/categories/shaved-pussy` },
-                { title: "Anal", url: `${baseUrl}/categories/anal` },
-                { title: "Interracial", url: `${baseUrl}/categories/interracial` },
-                { title: "Small Tits", url: `${baseUrl}/categories/small-tits` },
-                { title: "60 Fps", url: `${baseUrl}/categories/60-fps` },
-                { title: "Latina", url: `${baseUrl}/categories/latina` },
-                { title: "Pov", url: `${baseUrl}/categories/pov` },
-                { title: "Asian", url: `${baseUrl}/categories/asian` },
-                { title: "Masturbation", url: `${baseUrl}/categories/masturbation` },
-                { title: "Ebony", url: `${baseUrl}/categories/ebony` },
-                { title: "Bisexual", url: `${baseUrl}/categories/bisexual` },
-                { title: "Naughtyamerica", url: `${baseUrl}/categories/naughtyamerica` },
-                { title: "Casting", url: `${baseUrl}/categories/casting` }
+                { title: "Brunette", url: `${baseUrl}/brunette` },
+                { title: "1080 P", url: `${baseUrl}/1080-p` },
+                { title: "Shaved Pussy", url: `${baseUrl}/shaved-pussy` },
+                { title: "Anal", url: `${baseUrl}anal` },
+                { title: "Interracial", url: `${baseUrl}/interracial` },
+                { title: "Small Tits", url: `${baseUrl}/small-tits` },
+                { title: "60 Fps", url: `${baseUrl}/60-fps` },
+                { title: "Latina", url: `${baseUrl}/latina` },
+                { title: "Pov", url: `${baseUrl}/pov` },
+                { title: "Asian", url: `${baseUrl}/asian` },
+                { title: "Masturbation", url: `${baseUrl}/masturbation` },
+                { title: "Ebony", url: `${baseUrl}/ebony` },
+                { title: "Bisexual", url: `${baseUrl}/bisexual` },
+                { title: "Naughtyamerica", url: `${baseUrl}/naughtyamerica` },
+                { title: "Casting", url: `${baseUrl}/casting` }
             ];
             
             const data = {};
@@ -242,53 +242,41 @@
     }
 
     // 8. LOAD STREAMS FUNCTION (Aggregated Multi-Server Engine)
-    async function loadStreams(url, cb) {
+     async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
             
             if (res.status !== 200) {
-                return cb({ success: false, errorCode: "NETWORK_ERROR", message: "Failed to fetch servers page" });
+                return cb({ success: false, errorCode: "NETWORK_ERROR", message: "Failed to fetch video page" });
             }
             
             const html = res.body || "";
-            const intermediateLinks = extractServerLinks(html);
+            const rawStreams = parseVideoStreams(html);
             
-            if (intermediateLinks.length === 0) {
-                return cb({ success: false, errorCode: "NO_STREAMS", message: "No operational servers found" });
+            if (rawStreams.length === 0) {
+                return cb({ success: false, errorCode: "NO_STREAMS", message: "No video streams found" });
             }
             
-            const finalizedStreams = [];
-            
-            // Loop extended to evaluate up to 8 alternative nodes dynamically
-            for (let i = 0; i < Math.min(intermediateLinks.length, 8); i++) {
-                const targetUrl = intermediateLinks[i];
-                const directUrl = await resolveDirectVideoUrl(targetUrl);
+            // Convert to StreamResult objects with Magic Proxy for redirects
+            const streams = rawStreams.map(stream => {
+                // Use Magic Proxy v1 to handle 302 redirects
+                // Format: MAGIC_PROXY_v1 + base64(url)
+                const base64Url = btoa(stream.url);
+                const proxyUrl = "MAGIC_PROXY_v1" + base64Url;
                 
-                if (directUrl) {
-                    let sourceName = "Premium Node";
-                    if (targetUrl.includes("mydaddy")) sourceName = "MyDaddy Premium";
-                    else if (targetUrl.includes("streamtape")) sourceName = "Streamtape Engine";
-                    else if (targetUrl.includes("voe")) sourceName = "VOE HighSpeed";
-                    else if (targetUrl.includes("filemoon")) sourceName = "Filemoon Storage";
-                    
-                    finalizedStreams.push(new StreamResult({
-                        url: directUrl,
-                        source: sourceName,
-                        isHtml: directUrl.includes('iframe') || !directUrl.match(/\.(mp4|m3u8)/i), 
-                        headers: {
-                            "Referer": targetUrl.includes("mydaddy") ? "https://mydaddy.cc" : "https://allpornstream.com/",
-                            "User-Agent": HEADERS["User-Agent"]
-                        }
-                    }));
-                }
-            }
+                return new StreamResult({
+                    url: proxyUrl,
+                    source: stream.quality,  // Use 'source' not 'quality' for display
+                    headers: {
+                        "Referer": "https://www.wow.xxx/",
+                        "User-Agent": HEADERS["User-Agent"]
+                    }
+                });
+            });
             
-            if (finalizedStreams.length === 0) {
-                return cb({ success: false, errorCode: "NO_STREAMS", message: "Media nodes streams routing failed due to security locks" });
-            }
-            
-            cb({ success: true, data: finalizedStreams });
+            cb({ success: true, data: streams });
         } catch (e) {
+            console.error("loadStreams error: " + e.message);
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
