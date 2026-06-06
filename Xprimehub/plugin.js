@@ -218,61 +218,80 @@
      * Extract Cloud Links and pass them securely to prevent 0.01MB player crashes
      */
     async function loadStreams(url, cb) {
-        try {
-            const res = await secureFetch(url);
-            if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+    try {
+        const res = await secureFetch(url);
+        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+        
+        const html = res.body || "";
+        const streams = [];
+        
+        // एंकर टैग्स से लिंक्स निकालने का पैटर्न
+        const btnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+        let match;
+        
+        while ((match = btnPattern.exec(html)) !== null) {
+            const serverUrl = match[1];
+            const buttonContent = match[2];
+            const cleanText = buttonContent.replace(/<[^>]*>/g, '').trim(); 
             
-            const html = res.body || "";
-            const streams = [];
-            
-            const btnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-            let match;
-            
-            while ((match = btnPattern.exec(html)) !== null) {
-                const serverUrl = match[1];
-                const buttonContent = match[2];
-                const cleanText = buttonContent.replace(/<[^>]*>/g, '').trim(); 
+            // Vegamovies, FSL, v-cloud, filepress और अन्य क्लाउड सर्वर्स को ढूंढने के लिए फिल्टर एक्सटेंशन
+            if (serverUrl && (
+                serverUrl.includes('drive') || 
+                serverUrl.includes('cloud') || 
+                serverUrl.includes('press') || 
+                serverUrl.includes('direct') || 
+                serverUrl.includes('link') || 
+                serverUrl.includes('lol') || 
+                serverUrl.includes('site') || 
+                serverUrl.includes('hubcloud') ||
+                serverUrl.includes('fsl') ||         // FSL Server सपोर्ट जोड़ा गया
+                serverUrl.includes('vegamovies')     // Vegamovies डोमेन लिंक्स अलाउ किया गया
+            )) {
                 
-                if (serverUrl && (serverUrl.includes('drive') || serverUrl.includes('cloud') || serverUrl.includes('press') || serverUrl.includes('direct') || serverUrl.includes('link') || serverUrl.includes('lol') || serverUrl.includes('site') || serverUrl.includes('hubcloud'))) {
+                // विज्ञापन और थीम फाइलों को ब्लॉक करें, लेकिन Vegamovies/Xprimehub के स्ट्रीमिंग सर्वर्स को पास होने दें
+                if (!serverUrl.includes('adscore') && !serverUrl.includes('wp-content')) {
                     
-                    if (!serverUrl.includes('adscore') && !serverUrl.includes('wp-content') && !serverUrl.includes('vegamovies') && !serverUrl.includes('xprimehub')) {
-                        
-                        let serverLabel = "Cloud Storage Server";
-                        
-                        if (/g-direct/i.test(cleanText) || /g-direct/i.test(buttonContent)) {
-                            serverLabel = "⚡ G-Direct Link (External)";
-                        } else if (/v-cloud/i.test(cleanText) || /v-cloud/i.test(buttonContent)) {
-                            serverLabel = "🔥 V-Cloud Link (External)";
-                        } else if (/filepress/i.test(cleanText) || /filepress/i.test(buttonContent)) {
-                            serverLabel = "📁 Filepress Link (External)";
-                        } else if (cleanText.length > 1) {
-                            serverLabel = `🌐 skystream: ${cleanText}`;
-                        }
-
-                        streams.push(new StreamResult({
-                            url: serverUrl, 
-                            source: serverLabel,
-                            headers: { 
-                                "Referer": url, 
-                                "User-Agent": BASE_HEADERS["User-Agent"]
-                            },
-                            isDirect: true, 
-                            actionType: "direct" 
-                        }));
+                    let serverLabel = "🌐 SkyStream Fast Server";
+                    
+                    // बटन के टेक्स्ट के आधार पर सर्वर का नाम (Label) तय करना
+                    if (/fsl/i.test(cleanText) || /fsl/i.test(serverUrl)) {
+                        serverLabel = "🚀 [FSL Server] Direct Play";
+                    } else if (/g-direct/i.test(cleanText) || /g-direct/i.test(buttonContent)) {
+                        serverLabel = "⚡ G-Direct Link";
+                    } else if (/v-cloud/i.test(cleanText) || /v-cloud/i.test(buttonContent)) {
+                        serverLabel = "🔥 V-Cloud Link";
+                    } else if (/filepress/i.test(cleanText) || /filepress/i.test(buttonContent)) {
+                        serverLabel = "📁 Filepress Link";
+                    } else if (cleanText.length > 1) {
+                        serverLabel = `🌐 SkyStream: ${cleanText}`;
                     }
+
+                    // प्लेयर को डायरेक्ट वीडियो स्ट्रीम पास करना
+                    streams.push(new StreamResult({
+                        url: serverUrl, 
+                        source: serverLabel,
+                        headers: { 
+                            "Referer": url, 
+                            "User-Agent": BASE_HEADERS["User-Agent"]
+                        },
+                        isDirect: true,              // प्लेयर को बताता है कि यह डायरेक्ट लिंक है
+                        actionType: "play"           // "open_browser" की जगह "play" ताकि वीडियो ऐप के अंदर चले
+                    }));
                 }
             }
-            
-            if (streams.length > 0) {
-                cb({ success: true, data: streams });
-            } else {
-                cb({ success: false, errorCode: "NO_STREAMS", message: "No bypass cloud web buttons detected." });
-            }
-        } catch (e) {
-            console.error("loadStreams error: " + e.message);
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
+        
+        if (streams.length > 0) {
+            cb({ success: true, data: streams });
+        } else {
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No active Vegamovies or Cloud servers detected." });
+        }
+    } catch (e) {
+        console.error("loadStreams error: " + e.message);
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
+}
+
 
     // Global Framework Core Hooks Attachment
     globalThis.getHome = getHome;
