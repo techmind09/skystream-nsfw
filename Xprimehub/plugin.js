@@ -225,35 +225,108 @@
         const html = res.body || "";
         const streams = [];
         
-        // एंकर टैग्स से लिंक्स निकालने का पैटर्न
+        // एंकर टैग्स से लिंक्स निकालने का मास्टर पैटर्न
         const btnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
         let match;
         
         while ((match = btnPattern.exec(html)) !== null) {
-            const serverUrl = match[1];
+            let serverUrl = match[1];
             const buttonContent = match[2];
             const cleanText = buttonContent.replace(/<[^>]*>/g, '').trim(); 
             
-            // Vegamovies, FSL, v-cloud, filepress और अन्य क्लाउड सर्वर्स को ढूंढने के लिए फिल्टर एक्सटेंशन
+            // क्लाउड, FSL और वेगामूवीज स्ट्रीमिंग सर्वर्स फ़िल्टर लिस्ट
             if (serverUrl && (
-                serverUrl.includes('drive') || 
-                serverUrl.includes('cloud') || 
-                serverUrl.includes('press') || 
-                serverUrl.includes('direct') || 
-                serverUrl.includes('link') || 
-                serverUrl.includes('lol') || 
-                serverUrl.includes('site') || 
-                serverUrl.includes('hubcloud') ||
-                serverUrl.includes('fsl') ||         // FSL Server सपोर्ट जोड़ा गया
-                serverUrl.includes('vegamovies')     // Vegamovies डोमेन लिंक्स अलाउ किया गया
+                serverUrl.includes('drive') || serverUrl.includes('cloud') || 
+                serverUrl.includes('press') || serverUrl.includes('direct') || 
+                serverUrl.includes('link') || serverUrl.includes('lol') || 
+                serverUrl.includes('site') || serverUrl.includes('hubcloud') ||
+                serverUrl.includes('fsl') || serverUrl.includes('vegamovies') ||
+                serverUrl.includes('vcloud')
             )) {
                 
-                // विज्ञापन और थीम फाइलों को ब्लॉक करें, लेकिन Vegamovies/Xprimehub के स्ट्रीमिंग सर्वर्स को पास होने दें
+                // विज्ञापन और थीम असेट्स को ब्लॉक करें
                 if (!serverUrl.includes('adscore') && !serverUrl.includes('wp-content')) {
                     
+                    // --- 1. KOTLIN LOGIC: api/index.php रीडायरेक्ट रिज़ॉल्वर ---
+                    if (serverUrl.includes("api/index.php")) {
+                        try {
+                            const apiRes = await secureFetch(serverUrl);
+                            const apiHtml = apiRes.body || "";
+                            const redirectMatch = apiHtml.match(/<div class="main">[\s\S]*?<h4[^>]*>[\s\S]*?<a[^>]+href=["']([^"']+)["']/i);
+                            if (redirectMatch && redirectMatch[1]) {
+                                serverUrl = redirectMatch[1];
+                            }
+                        } catch (err) { console.error("Index redirect failed", err); }
+                    }
+
+                    // --- 2. KOTLIN LOGIC: VCloud स्क्रिप्ट गेटवे पार्सर ('var url = ...') ---
+                    if (serverUrl.includes("vcloud") || serverUrl.includes("lol")) {
+                        try {
+                            const vcloudRes = await secureFetch(serverUrl);
+                            const vcloudHtml = vcloudRes.body || "";
+                            
+                            // इंटरनल स्क्रिप्ट टैग से वास्तविक क्लाउड गेटवे यूआरएल ढूंढें
+                            const scriptUrlMatch = vcloudHtml.match(/var\s+url\s*=\s*'([^']+)'/i);
+                            if (scriptUrlMatch && scriptUrlMatch[1]) {
+                                const finalGatewayUrl = scriptUrlMatch[1];
+                                
+                                // फाइनल रिज़ॉल्वर गेटवे पेज लोड करें
+                                const gatewayRes = await secureFetch(finalGatewayUrl);
+                                const gatewayHtml = gatewayRes.body || "";
+                                
+                                // फ़ाइल का आकार (Size) निकालें
+                                const sizeMatch = gatewayHtml.match(/<i[^>]+id="size"[^>]*>([^<]+)<\/i>/i);
+                                const fileSize = sizeMatch ? ` [${sizeMatch[1].trim()}]` : "";
+                                
+                                // गेटवे पेज के अंदर मौजूद सर्वर्स को प्रोसेस करें
+                                const innerBtnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+                                let innerMatch;
+                                
+                                while ((innerMatch = innerBtnPattern.exec(gatewayHtml)) !== null) {
+                                    let targetLink = innerMatch[1];
+                                    const innerText = innerMatch[2].replace(/<[^>]*>/g, '').trim();
+                                    
+                                    if (innerText.toLowerCase().includes("telegram")) continue;
+
+                                    let label = "🌐 V-Cloud Stream";
+                                    
+                                    // A. Technorozen Workers (Direct Play 10 Gbps)
+                                    if (targetLink.includes("technorozen.workers.dev")) {
+                                        const trRes = await secureFetch(targetLink);
+                                        const trMatch = (trRes.body || "").match(/id="vd"[^>]+href=["']([^"']+)["']/i);
+                                        if (trMatch && trMatch[1]) targetLink = trMatch[1];
+                                        label = "🚀 V-Cloud 10 Gbps" + fileSize;
+                                    } 
+                                    // B. Pixeldrain क्लाउड सर्वर
+                                    else if (targetLink.includes("pixeldra")) {
+                                        label = "📁 Pixeldrain Direct" + fileSize;
+                                    } 
+                                    // C. dl.php डायरेक्ट स्ट्रीम/डाउनलोड लिंक
+                                    else if (targetLink.includes("dl.php")) {
+                                        label = "🔥 V-Cloud [Download]" + fileSize;
+                                    } 
+                                    // D. FSL / क्लाउड एक्सटेंशन्स (.lol, .dev, .hubcdn.xyz)
+                                    else if ([".dev", ".hubcdn.xyz", ".lol"].some(ext => targetLink.includes(ext))) {
+                                        label = targetLink.includes(".lol") ? "⚡ V-Cloud [FSL]" + fileSize : "🌐 V-Cloud" + fileSize;
+                                    }
+
+                                    // डिकोड किए गए लिंक को स्टोर करें
+                                    if (!streams.some(s => s.url === targetLink)) {
+                                        streams.push(new StreamResult({
+                                            url: targetLink,
+                                            source: label,
+                                            headers: { "Referer": "", "User-Agent": BASE_HEADERS["User-Agent"] },
+                                            isDirect: true,
+                                            actionType: "play"
+                                        }));
+                                    }
+                                }
+                            }
+                        } catch (err) { console.error("Deep link extraction failed", err); }
+                    }
+
+                    // --- 3. फॉलबैक रिज़ॉल्वर: यदि लिंक ऊपर डिकोड नहीं हुआ तो डायरेक्ट लेबल दें ---
                     let serverLabel = "🌐 SkyStream Fast Server";
-                    
-                    // बटन के टेक्स्ट के आधार पर सर्वर का नाम (Label) तय करना
                     if (/fsl/i.test(cleanText) || /fsl/i.test(serverUrl)) {
                         serverLabel = "🚀 [FSL Server] Direct Play";
                     } else if (/g-direct/i.test(cleanText) || /g-direct/i.test(buttonContent)) {
@@ -266,17 +339,19 @@
                         serverLabel = `🌐 SkyStream: ${cleanText}`;
                     }
 
-                    // प्लेयर को डायरेक्ट वीडियो स्ट्रीम पास करना
-                    streams.push(new StreamResult({
-                        url: serverUrl, 
-                        source: serverLabel,
-                        headers: { 
-                            "Referer": url, 
-                            "User-Agent": BASE_HEADERS["User-Agent"]
-                        },
-                        isDirect: true,              // प्लेयर को बताता है कि यह डायरेक्ट लिंक है
-                        actionType: "play"           // "open_browser" की जगह "play" ताकि वीडियो ऐप के अंदर चले
-                    }));
+                    // डुप्लीकेट स्ट्रीम्स एंट्रीज को रोकने के लिए वेरिफिकेशन चेक
+                    if (!streams.some(s => s.url === serverUrl)) {
+                        streams.push(new StreamResult({
+                            url: serverUrl, 
+                            source: serverLabel,
+                            headers: { 
+                                "Referer": url, 
+                                "User-Agent": BASE_HEADERS["User-Agent"]
+                            },
+                            isDirect: true,              
+                            actionType: "play"           
+                        }));
+                    }
                 }
             }
         }
