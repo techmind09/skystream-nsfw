@@ -207,60 +207,80 @@
      * 6. LOAD STREAMS (ROUTER CHANNEL CONFIGURATION)
      */
     async function loadStreams(url, cb) {
-        try {
-            const res = await http_get(url, HEADERS);
-            if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
-            
-            const html = res.body || "";
-            const streams = [];
-            
-            const btnPattern = /<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>/gi;
-            let match;
-            
-            while ((match = btnPattern.exec(html)) !== null) {
-                let rawUrl = match[1].trim();
-                
-                let isStreamtape = rawUrl.includes("https://streamtape.com");
-                let isMixdrop = rawUrl.includes("https://voe.sx") || rawUrl.includes("https://mixdrop.top");
-                let isMyvidplay = rawUrl.includes("https://xtremestream.co");
+    try {
+        const res = await http_get(url, HEADERS);
+        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
+        
+        const html = res.body || "";
+        const streams = [];
+        
+        // Is regex ko thoda modify kiya hai taaki normal text URLs aur hrefs dono check ho sakein
+        const btnPattern = /<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>/gi;
+        let match;
+        
+        // 1. Pehle HTML ke andar anchor tags (`<a>`) ko check karein
+        while ((match = btnPattern.exec(html)) !== null) {
+            let rawUrl = match[1].trim();
+            processUrl(rawUrl, url, streams);
+        }
 
-                if (isStreamtape || isMixdrop || isxtreamstream) {
-                    let playUrl = rawUrl;
-                    let sourceTag = "direct Player";
+        // 2. Agar lapecontent ka link direct text ya kisi script mein chhupa ho, toh usko bhi check karein
+        const lapePattern = /(https?:\/\/[^\s"'`<>]+lapecontent\.net\/[^\s"'`<>]+)/gi;
+        let lapeMatch;
+        while ((lapeMatch = lapePattern.exec(html)) !== null) {
+            let rawUrl = lapeMatch[1].trim();
+            processUrl(rawUrl, url, streams);
+        }
+        
+        if (streams.length > 0) {
+            cb({ success: true, data: streams });
+        } else {
+            cb({ success: false, errorCode: "NO_STREAMS", message: "No current servers online." });
+        }
+    } catch (e) {
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+    }
+}
 
-                    if (isStreamtape) {
-                        sourceTag = "Streamtape";
-                        playUrl = rawUrl.replace("/v/", "/e/");
-                    } else if (isMixdrop) {
-                        sourceTag = "Mixdrop";
-                        playUrl = rawUrl.replace("/f/", "/e/");
-                    } else if (isMyvidplay) {
-                        sourceTag = "Xtreamstream";
-                        playUrl = rawUrl.replace("/d/", "/e/");
-                    }
+// URLs ko handle karne ke liye helper function
+function processUrl(rawUrl, refererUrl, streams) {
+    let isStreamtape = rawUrl.includes("streamtape.com");
+    let isMixdrop = rawUrl.includes("mixdrop.") || rawUrl.includes("m1xdrop.");
+    let isMyvidplay = rawUrl.includes("myvidplay.com");
+    let isLapeContent = rawUrl.includes("lapecontent.net");
 
-                    if (!streams.some(s => s.url === playUrl)) {
-                        streams.push(new StreamResult({
-                            url: playUrl, 
-                            source: sourceTag,
-                            headers: { 
-                                "Referer": url,
-                                "User-Agent": HEADERS["User-Agent"]
-                            }
-                        }));
-                    }
+    if (isStreamtape || isMixdrop || isMyvidplay || isLapeContent) {
+        let playUrl = rawUrl;
+        let sourceTag = "Web Mirror Player";
+
+        if (isStreamtape) {
+            sourceTag = "Streamtape Server";
+            playUrl = rawUrl.replace("/v/", "/e/");
+        } else if (isMixdrop) {
+            sourceTag = "Mixdrop Server";
+            playUrl = rawUrl.replace("/f/", "/e/");
+        } else if (isMyvidplay) {
+            sourceTag = "Myvidplay Server";
+            playUrl = rawUrl.replace("/d/", "/e/");
+        } else if (isLapeContent) {
+            sourceTag = "LapeContent Server";
+            // Lapecontent aamtaur par direct video link hota hai, 
+            // isliye isme replace ki zaroorat nahi padti.
+            playUrl = rawUrl; 
+        }
+
+        if (!streams.some(s => s.url === playUrl)) {
+            streams.push(new StreamResult({
+                url: playUrl, 
+                source: sourceTag,
+                headers: { 
+                    "Referer": refererUrl,
+                    "User-Agent": HEADERS["User-Agent"]
                 }
-            }
-            
-            if (streams.length > 0) {
-                cb({ success: true, data: streams });
-            } else {
-                cb({ success: false, errorCode: "NO_STREAMS", message: "No current servers online." });
-            }
-        } catch (e) {
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+            }));
         }
     }
+}
 
     // 7. EXPOSE HOOKS
     globalThis.getHome = getHome;
