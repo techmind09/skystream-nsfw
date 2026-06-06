@@ -203,60 +203,34 @@
      * 6. LOAD STREAMS (THE ALL-IN-ONE WILDCARD RESOLVER)
      * Ab koi bhi host ho (Streamtape, Mixdrop, Voe, Xtreamstream) sab automatically parse honge.
      */
-    async function loadStreams(url, cb) {
+  async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
             if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
             
             const html = res.body || "";
             const streams = [];
-            
-            // Loose Wildcard Matcher: Yeh page ke saare external streaming/downloading anchor buttons utha lega
-            const btnPattern = /<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
             let match;
             
-            while ((match = btnPattern.exec(html)) !== null) {
-                let rawUrl = match[1].trim();
-                let btnText = match[2].replace(/<[^>]*>/g, '').toUpperCase().trim();
-                
-                // Ads aur analytics scripts ke domains ko filter out karne ke liye guard list
-                if (rawUrl.includes('clarity.ms') || rawUrl.includes('adscore') || rawUrl.includes('google') || rawUrl.includes('facebook') || rawUrl.includes('xmoviesforyou')) {
-                    continue;
-                }
-
-                let playUrl = rawUrl;
-                let sourceTag = btnText || "External Link";
-
-                // Playback Error Bypass Logic: Har single server ke URLs ko real streaming embed syntax me badlein
-                if (rawUrl.includes("streamtape")) {
-                    sourceTag = "Streamtape Server";
-                    playUrl = rawUrl.replace("/v/", "/e/");
-                } else if (rawUrl.includes("mixdrop") || rawUrl.includes("m1xdrop")) {
-                    sourceTag = "Mixdrop Server";
-                    playUrl = rawUrl.replace("/f/", "/e/");
-                } else if (rawUrl.includes("voe")) {
-                    sourceTag = "Voe Server";
-                    // Voe generic dynamic embed converter
-                    if (rawUrl.includes("/v/")) playUrl = rawUrl.replace("/v/", "/e/");
-                } else if (rawUrl.includes("xtreamstream") || rawUrl.includes("stream")) {
-                    sourceTag = btnText.includes("XTREAM") ? "XtreamStream" : `Server [${btnText}]`;
-                    if (rawUrl.includes("/v/")) playUrl = rawUrl.replace("/v/", "/e/");
-                } else if (rawUrl.includes("dood")) {
-                    sourceTag = "DoodStream";
-                    playUrl = rawUrl.replace("/d/", "/e/");
-                }
-
-                // Cloudflare-DNS and Token Bypass Encapsulation Protocol 
-                const proxyWrappedUrl = "MAGIC_PROXY_v1" + btoa(playUrl);
-
-                if (!streams.some(s => s.url === proxyWrappedUrl)) {
+            const iframePattern = /<iframe[^>]*src="([^"]+)"[^>]*>/gi;
+            while ((match = iframePattern.exec(html)) !== null) {
+                const iframeUrl = match[1];
+                if (/player|video|embed|\.mp4|\.m3u8/i.test(iframeUrl)) {
                     streams.push(new StreamResult({
-                        url: proxyWrappedUrl, 
-                        source: sourceTag,
-                        headers: { 
-                            "Referer": url,
-                            "User-Agent": HEADERS["User-Agent"]
-                        }
+                        url: "MAGIC_PROXY_v1" + btoa(iframeUrl),
+                        source: "Beeg24 Player",
+                        headers: { "Referer": url", "User-Agent": HEADERS["User-Agent"] }
+                    }));
+                }
+            }
+            
+            if (streams.length === 0) {
+                const videoPattern = /<video[^>]*>[\s\S]*?<source[^>]*src="([^"]+)"[^>]*>/gi;
+                while ((match = videoPattern.exec(html)) !== null) {
+                    streams.push(new StreamResult({
+                        url: "MAGIC_PROXY_v1" + btoa(match[1]),
+                        source: "Native Player",
+                        headers: { "Referer": url", "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
             }
@@ -264,13 +238,12 @@
             if (streams.length > 0) {
                 cb({ success: true, data: streams });
             } else {
-                cb({ success: false, errorCode: "NO_STREAMS", message: "No stream servers could be extracted." });
+                cb({ success: false, errorCode: "NO_STREAMS" });
             }
         } catch (e) {
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
     }
-
     // 7. CORE LIFECYCLE ENGINE INITIALIZATION
     globalThis.getHome = getHome;
     globalThis.search = search;
