@@ -104,7 +104,7 @@
      */
     async function getHome(cb) {
         try {
-            const baseUrl = manifest.baseUrl || "https://xprimehub.hair";
+            const baseUrl = manifest.baseUrl || "https://vegamovies.pages.dev";
             
             // Fixed direct links mapped natively from the target site UI menus
             const categories = {
@@ -246,7 +246,7 @@
                         } else if (/filepress/i.test(cleanText) || /filepress/i.test(buttonContent)) {
                             serverLabel = "📁 Filepress Link (External)";
                         } else if (cleanText.length > 1) {
-                            serverLabel = `🌐 Bypass Server: ${cleanText}`;
+                            serverLabel = `🌐 skystream: ${cleanText}`;
                         }
 
                         streams.push(new StreamResult({
@@ -256,8 +256,8 @@
                                 "Referer": url, 
                                 "User-Agent": BASE_HEADERS["User-Agent"]
                             },
-                            isDirect: false, 
-                            actionType: "open_browser" 
+                            isDirect: true, 
+                            actionType: "direct" 
                         }));
                     }
                 }
