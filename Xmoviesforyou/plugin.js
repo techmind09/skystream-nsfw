@@ -206,39 +206,45 @@
     /**
      * 6. LOAD STREAMS (ROUTER CHANNEL CONFIGURATION)
      */
-    async function getCustomStreamTape(url) {
-    // StreamTape ke liye Referer jaruri hai
-    const response = await fetch(url, {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer': url 
-        }
-    });
-    const html = await response.text();
-    const match = html.match(/get\('botlink'\)\.innerHTML\s*=\s*['"](.*?)['"]/);
-    if (match) {
-        return [{ title: "Streamtape", url: `https:${match[1]}&stream=1`, quality: "Unknown" }];
-    }
-    return [];
-}
+        /**
+     * 6. LOAD STREAMS (ROUTER CHANNEL CONFIGURATION)
+     */
+    async function loadStreams(url, cb) {
+        try {
+            let streams = [];
+            
+            // Logic: Agar URL mein streamtape hai toh StreamTape extractor chalayein
+            if (url.includes('streamtape')) {
+                streams = await getCustomStreamTape(url);
+            } 
+            // Agar URL mein mixdrop hai toh MixDrop extractor chalayein
+            else if (url.includes('mixdrop')) {
+                streams = await getCustomMixDrop(url);
+            }
 
-async function getCustomMixDrop(url) {
-    const embedUrl = url.replace('/f/', '/e/');
-    // MixDrop ke liye Referer ko domain ke hisaab se set karna
-    const response = await fetch(embedUrl, {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Referer': 'https://mixdrop.co/' 
+            // Callback return karein
+            cb({ success: true, data: streams });
+        } catch (e) {
+            console.error("loadStreams Error: ", e);
+            cb({ success: false, message: e.message });
         }
-    });
-    const html = await response.text();
-    const match = html.match(/wurl\s*=\s*"(.*?)"/);
-    if (match) {
-        const videoUrl = match[1].startsWith('//') ? `https:${match[1]}` : match[1];
-        return [{ title: "Mixdrop", url: videoUrl, quality: "Unknown" }];
     }
-    return [];
-}
+
+    // Helper functions (Jo pehle define kiye the)
+    async function getCustomStreamTape(url) {
+        const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': url } });
+        const html = await response.text();
+        const match = html.match(/get\('botlink'\)\.innerHTML\s*=\s*['"](.*?)['"]/);
+        return match ? [{ title: "Streamtape", url: `https:${match[1]}&stream=1`, quality: "Unknown" }] : [];
+    }
+
+    async function getCustomMixDrop(url) {
+        const embedUrl = url.replace('/f/', '/e/');
+        const response = await fetch(embedUrl, { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://mixdrop.co/' } });
+        const html = await response.text();
+        const match = html.match(/wurl\s*=\s*"(.*?)"/);
+        return match ? [{ title: "Mixdrop", url: match[1].startsWith('//') ? `https:${match[1]}` : match[1], quality: "Unknown" }] : [];
+    }
 
     // 7. EXPOSE HOOKS
     globalThis.getHome = getHome;
