@@ -339,7 +339,7 @@ function processUrl(rawUrl, refererUrl, streams) {
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
                         url: videoUrl,
-                        source: "Video HTML5 Native",
+                        source: "Video",
                         headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
@@ -353,7 +353,7 @@ function processUrl(rawUrl, refererUrl, streams) {
                     const videoUrl = match[1];
                     streams.push(new StreamResult({
                         url: videoUrl,
-                        source: "Direct MP4 Native",
+                        source: "Direct",
                         headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
                     }));
                 }
