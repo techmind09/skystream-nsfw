@@ -200,6 +200,11 @@
     /**
      * 6. LOAD STREAMS (FIXED & MERGED EXTRACTOR ENGINE)
      */
+    
+            // 2. STANDARD IFRAME SCAN (Fallback)
+                /**
+     * 6. LOAD STREAMS (TARGETED BUTTON & XMFU PLAYER EXTRACTOR)
+     */
     async function loadStreams(url, cb) {
         try {
             const res = await http_get(url, HEADERS);
@@ -208,76 +213,67 @@
             const html = res.body || "";
             const streams = [];
             const baseUrl = "https://xmoviesforyou.com"; 
-            
-            // 1. DEEP RAW TEXT SCAN
-            const URL_PATTERN = /(https?:)?\/\/[^\s"'`<>]+(?:dood|streamtape|mixdrop|voe|vidhide|emturbovid|fslv2|fslserver|mycloudz|xtreamstream|lapecontent\.net|myvidplay\.com)[^\s"'`<>]+/gi;
+
+            // ========================================================
+            // TARGET 1: Download Buttons (Streamtape, Mixdrop, Dood)
+            // ========================================================
+            // Ye HTML mein <a> tags ke andar se in servers ke links nikalega
+            const btnPattern = /<a[^>]+href=["'](https?:\/\/[^"']+(?:streamtape\.com|mixdrop\.[a-z]+|dood\.[a-z]+|voe\.sx)[^"']*)["'][^>]*>/gi;
+            let match;
+            while ((match = btnPattern.exec(html)) !== null) {
+                let link = match[1];
+                await processOrExtract(link, url, streams);
+            }
+
+            // ========================================================
+            // TARGET 2: Iframe Embedded Players
+            // ========================================================
+            const iframePattern = /<iframe[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
+            while ((match = iframePattern.exec(html)) !== null) {
+                let iframeUrl = match[1];
+                if (iframeUrl.startsWith('//')) iframeUrl = 'https:' + iframeUrl;
+                if (iframeUrl.startsWith('/')) iframeUrl = baseUrl + iframeUrl;
+                
+                if (!iframeUrl.includes('ads') && !iframeUrl.includes('disqus')) {
+                    await processOrExtract(iframeUrl, url, streams);
+                }
+            }
+
+            // ========================================================
+            // TARGET 3: XMFU HD Server (Direct MP4/M3U8)
+            // ========================================================
+            const mp4Pattern = /(https?:)?\/\/[^\s"'`<>]+(?:\.mp4|\.m3u8)[^\s"'`<>]*/gi;
+            let mp4Matches = html.match(mp4Pattern) || [];
+            for (let link of [...new Set(mp4Matches)]) {
+                if (link.startsWith('//')) link = 'https:' + link;
+                if (!link.includes('ads') && !link.includes('disqus')) {
+                    streams.push(new StreamResult({
+                        url: link,
+                        source: "XMFU HD Server", // Custom naam aapke screenshot ke mutabiq
+                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
+                    }));
+                }
+            }
+
+            // ========================================================
+            // TARGET 4: Raw Text Fallback (Scripts ke andar chhupa hua)
+            // ========================================================
+            const URL_PATTERN = /(https?:)?\/\/[^\s"'`<>]+(?:dood|streamtape|mixdrop|voe|vidhide|lapecontent\.net|myvidplay\.com)[^\s"'`<>]+/gi;
             let rawMatches = html.match(URL_PATTERN) || [];
-            let uniqueUrls = [...new Set(rawMatches)];
-            
-            for (let cleanUrl of uniqueUrls) {
+            for (let cleanUrl of [...new Set(rawMatches)]) {
                 if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
-                if (!cleanUrl.includes('ads') && !cleanUrl.includes('disqus') && !cleanUrl.includes('google')) {
+                if (!cleanUrl.includes('ads') && !cleanUrl.includes('disqus')) {
                     await processOrExtract(cleanUrl, url, streams);
                 }
             }
 
-            // 2. STANDARD IFRAME SCAN (Fallback)
-            if (streams.length === 0) {
-                const iframePattern = /<iframe[^>]+(?:src|data-src)=["']([^"']+)["']/gi;
-                let match;
-                while ((match = iframePattern.exec(html)) !== null) {
-                    let iframeUrl = match[1];
-                    if (iframeUrl.startsWith('//')) iframeUrl = 'https:' + iframeUrl;
-                    if (iframeUrl.startsWith('/')) iframeUrl = baseUrl + iframeUrl;
-                    
-                    if (!iframeUrl.includes('ads') && !iframeUrl.includes('disqus')) {
-                        await processOrExtract(iframeUrl, url, streams);
-                    }
-                }
-            }
-            
-            // 3. Custom Attributes Scan (data-link, data-video)
-            if (streams.length === 0) {
-                const dataLinkPattern = /(?:data-link|data-src|data-video)=["']([^"']+)["']/gi;
-                let match;
-                while ((match = dataLinkPattern.exec(html)) !== null) {
-                    let dUrl = match[1];
-                    if (dUrl.startsWith('//')) dUrl = 'https:' + dUrl;
-                    if (dUrl.startsWith('/')) dUrl = baseUrl + dUrl;
-                    await processOrExtract(dUrl, url, streams);
-                }
-            }
-            
-            // 4. Native HTML5 Video Element Fallback
-            if (streams.length === 0) {
-                const videoPattern = /<video[^>]*>[\s\S]*?<source[^>]*src=["']([^"']+)["'][^>]*>/gi;
-                let match;
-                while ((match = videoPattern.exec(html)) !== null) {
-                    streams.push(new StreamResult({
-                        url: match[1],
-                        source: "Direct Video",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
-                    }));
-                }
-            }
+            // CLEANUP: Koi duplicate link do baar add na ho
+            const uniqueStreams = streams.filter((v, i, a) => a.findIndex(t => (t.url === v.url)) === i);
 
-            // 5. Plain MP4 Reference Fallback
-            if (streams.length === 0) {
-                const directPattern = /href=["']([^"']+\.mp4)["'][^>]*>/gi;
-                let match;
-                while ((match = directPattern.exec(html)) !== null) {
-                    streams.push(new StreamResult({
-                        url: match[1],
-                        source: "Direct MP4",
-                        headers: { "Referer": url, "User-Agent": HEADERS["User-Agent"] }
-                    }));
-                }
-            }
-            
-            if (streams.length > 0) {
-                cb({ success: true, data: streams });
+            if (uniqueStreams.length > 0) {
+                cb({ success: true, data: uniqueStreams });
             } else {
-                cb({ success: false, errorCode: "NO_STREAMS", message: "No current servers online or layout changed." });
+                cb({ success: false, errorCode: "NO_STREAMS", message: "No compatible servers found on page." });
             }
         } catch (e) {
             cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
