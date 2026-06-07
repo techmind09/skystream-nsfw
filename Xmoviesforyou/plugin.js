@@ -206,80 +206,38 @@
     /**
      * 6. LOAD STREAMS (ROUTER CHANNEL CONFIGURATION)
      */
-    async function loadStreams(url, cb) {
-    try {
-        const res = await http_get(url, HEADERS);
-        if (res.status !== 200) return cb({ success: false, errorCode: "NETWORK_ERROR" });
-        
-        const html = res.body || "";
-        const streams = [];
-        
-        // Is regex ko thoda modify kiya hai taaki normal text URLs aur hrefs dono check ho sakein
-        const btnPattern = /<a\s+[^>]*href=["'](https?:\/\/[^"']+)["'][^>]*>/gi;
-        let match;
-        
-        // 1. Pehle HTML ke andar anchor tags (`<a>`) ko check karein
-        while ((match = btnPattern.exec(html)) !== null) {
-            let rawUrl = match[1].trim();
-            processUrl(rawUrl, url, streams);
+    async function getCustomStreamTape(url) {
+    // StreamTape ke liye Referer jaruri hai
+    const response = await fetch(url, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': url 
         }
-
-        // 2. Agar lapecontent ka link direct text ya kisi script mein chhupa ho, toh usko bhi check karein
-        const lapePattern = /(https?:\/\/[^\s"'`<>]+lapecontent\.net\/[^\s"'`<>]+)/gi;
-        let lapeMatch;
-        while ((lapeMatch = lapePattern.exec(html)) !== null) {
-            let rawUrl = lapeMatch[1].trim();
-            processUrl(rawUrl, url, streams);
-        }
-        
-        if (streams.length > 0) {
-            cb({ success: true, data: streams });
-        } else {
-            cb({ success: false, errorCode: "NO_STREAMS", message: "No current servers online." });
-        }
-    } catch (e) {
-        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+    });
+    const html = await response.text();
+    const match = html.match(/get\('botlink'\)\.innerHTML\s*=\s*['"](.*?)['"]/);
+    if (match) {
+        return [{ title: "Streamtape", url: `https:${match[1]}&stream=1`, quality: "Unknown" }];
     }
+    return [];
 }
 
-// URLs ko handle karne ke liye helper function
-function processUrl(rawUrl, refererUrl, streams) {
-    let isStreamtape = rawUrl.includes("streamtape.com");
-    let isMixdrop = rawUrl.includes("mixdrop.") || rawUrl.includes("m1xdrop.");
-    let isMyvidplay = rawUrl.includes("myvidplay.com");
-    let isLapeContent = rawUrl.includes("lapecontent.net");
-
-    if (isStreamtape || isMixdrop || isMyvidplay || isLapeContent) {
-        let playUrl = rawUrl;
-        let sourceTag = "Web Mirror Player";
-
-        if (isStreamtape) {
-            sourceTag = "Streamtape Server";
-            playUrl = rawUrl.replace("/v/", "/e/");
-        } else if (isMixdrop) {
-            sourceTag = "Mixdrop Server";
-            playUrl = rawUrl.replace("/f/", "/e/");
-        } else if (isMyvidplay) {
-            sourceTag = "Myvidplay Server";
-            playUrl = rawUrl.replace("/d/", "/e/");
-        } else if (isLapeContent) {
-            sourceTag = "LapeContent Server";
-            // Lapecontent aamtaur par direct video link hota hai, 
-            // isliye isme replace ki zaroorat nahi padti.
-            playUrl = rawUrl; 
+async function getCustomMixDrop(url) {
+    const embedUrl = url.replace('/f/', '/e/');
+    // MixDrop ke liye Referer ko domain ke hisaab se set karna
+    const response = await fetch(embedUrl, {
+        headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://mixdrop.co/' 
         }
-
-        if (!streams.some(s => s.url === playUrl)) {
-            streams.push(new StreamResult({
-                url: playUrl, 
-                source: sourceTag,
-                headers: { 
-                    "Referer": refererUrl,
-                    "User-Agent": HEADERS["User-Agent"]
-                }
-            }));
-        }
+    });
+    const html = await response.text();
+    const match = html.match(/wurl\s*=\s*"(.*?)"/);
+    if (match) {
+        const videoUrl = match[1].startsWith('//') ? `https:${match[1]}` : match[1];
+        return [{ title: "Mixdrop", url: videoUrl, quality: "Unknown" }];
     }
+    return [];
 }
 
     // 7. EXPOSE HOOKS
