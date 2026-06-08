@@ -1,23 +1,5 @@
 [
   {
-    "packageName": "com.skystream-nsfw.allstreampron",
-    "name": "Allstreampron",
-    "version": 1,
-    "baseUrl": "https://allpornstream.com",
-    "description": "Free Premium Porn Movies in Full Length from biggest Premium Porn Sites: MYLF, Brazzers, BLACKED, TeamSkeet and many more!",
-    "authors": [
-      "techmind09"
-    ],
-    "languages": [
-      "en"
-    ],
-    "categories": [
-      "NSFW"
-    ],
-    "isAdult": true,
-    "url": "https://raw.githubusercontent.com/techmind09/skystream-nsfw/repo/dist/com.skystream-nsfw.allstreampron.sky"
-  },
-  {
     "packageName": "com.skystream-nsfw.Wow",
     "name": "Wow",
     "version": 1,
