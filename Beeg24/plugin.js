@@ -215,4 +215,4 @@
     globalThis.search = search;
     globalThis.load = load;
     globalThis.loadStreams = loadStreams;
-})();, 
+})();
