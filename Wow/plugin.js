@@ -148,12 +148,57 @@
                 categoryItems[categoryName] = [];
             }
         }
+
+   async function getHome(cb) {
+     try {
+        const baseUrl = manifest.baseUrl || "https://www.wow.xxx";
         
-        if (Object.keys(categoryItems).length === 0) {
-            return cb({ success: false, errorCode: "PARSE_ERROR", message: "Failed to load any categories" });
+        // CORRECTED URLs - With "/categories/" path
+        const categories = {
+            "Latest Videos": `${baseUrl}/`,
+            "Most Popular": `${baseUrl}/most-popular/`,
+            "Big Ass": `${baseUrl}/categories/big-ass`,
+            "Big Cock": `${baseUrl}/categories/big-cock`,
+            "MILF": `${baseUrl}/categories/milf`,
+            "Mature": `${baseUrl}/categories/mature`,
+            "Latina": `${baseUrl}/categories/latina`,
+            "Indian": `${baseUrl}/categories/indian`,
+            "Interracial": `${baseUrl}/categories/interracial`,
+            "BBC (Big Black Cock)": `${baseUrl}/categories/bbc`,
+            "Ass-To-Mouth": `${baseUrl}/categories/ass-to-mouth`,
+            "Big Tits": `${baseUrl}/categories/big-tits`,
+            "Anal": `${baseUrl}/categories/anal`,
+            "Amateur": `${baseUrl}/categories/amateur`,
+            "Lesbian": `${baseUrl}/categories/lesbian`,
+            "Threesome": `${baseUrl}/categories/threesome`
+        };
+        
+        const categoryItems = {};
+        
+        for (const [categoryName, categoryUrl] of Object.entries(categories)) {
+            try {
+                console.log(`Loading: ${categoryName} - ${categoryUrl}`);
+                const res = await http_get(categoryUrl, HEADERS);
+                
+                if (res.status === 200 && res.body) {
+                    // Try different parsing methods
+                    let items = parseCategoryItemsImproved(res.body);
+                    if (items.length === 0) items = parseVideoItems(res.body);
+                    
+                    if (items.length > 0) {
+                        categoryItems[categoryName] = items.slice(0, 20);
+                    } else {
+                        categoryItems[categoryName] = [];
+                    }
+                } else {
+                    categoryItems[categoryName] = [];
+                }
+            } catch (e) {
+                console.error(`Error loading ${categoryName}: ${e.message}`);
+                categoryItems[categoryName] = [];
+            }
         }
         
-        // SkyStream expects data in this format
         cb({ success: true, data: categoryItems });
         
     } catch (e) {
@@ -162,30 +207,47 @@
     }
 }
 
-    /**
-     * Search for videos
-     */
-    async function search(query, cb) {
-        try {
-            const baseUrl = manifest.baseUrl || "https://www.wow.xxx";
-            const searchUrl = `${baseUrl}/search/${encodeURIComponent(query)}/relevance/`;
-            
-            const res = await http_get(searchUrl, HEADERS);
-            
-            if (res.status !== 200) {
-                return cb({ success: false, errorCode: "NETWORK_ERROR", message: "Failed to fetch search results" });
-            }
-            
-            let items = parseCategoryItems(res.body || "");
-            if (items.length === 0) items = parseVideoItems(res.body || "");
-            
-            cb({ success: true, data: items });
-        } catch (e) {
-            console.error("search error: " + e.message);
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
+// IMPROVED PARSER for category pages
+function parseCategoryItemsImproved(html) {
+    const items = [];
+    
+    // Pattern 1: Standard video thumbnails from wow.xxx category pages
+    const pattern1 = /<a[^>]+href="(https?:\/\/www\.wow\.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"[^>]+alt="([^"]+)"/gi;
+    
+    let match;
+    while ((match = pattern1.exec(html)) !== null) {
+        const url = match[1];
+        const posterUrl = match[2];
+        const title = match[3];
+        
+        if (url && url.includes('/videos/') && title && !title.includes('WOW.XXX')) {
+            items.push(new MultimediaItem({
+                title: title.trim(),
+                url: url,
+                posterUrl: posterUrl,
+                type: "movie",
+                isAdult: true
+            }));
         }
     }
-
+    
+    // Pattern 2: data-src or lazy loading images
+    if (items.length === 0) {
+        const pattern2 = /<a[^>]+href="(https?:\/\/www\.wow\.xxx\/videos\/[^"]+)"[^>]*>[\s\S]*?<img[^>]+data-src="([^"]+)"[^>]+alt="([^"]+)"/gi;
+        
+        while ((match = pattern2.exec(html)) !== null) {
+            items.push(new MultimediaItem({
+                title: match[3].trim(),
+                url: match[1],
+                posterUrl: match[2],
+                type: "movie",
+                isAdult: true
+            }));
+        }
+    }
+    
+    return items;
+}
     /**
      * Load video details
      */
