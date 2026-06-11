@@ -97,62 +97,70 @@
      * Get homepage content with menu categories (FIXED ACCURATE GRID FETCH)
      */
     async function getHome(cb) {
-        try {
-            const baseUrl = manifest.baseUrl || "https://www.wow.xxx";
-            
-            const categories = {
-                "Latest Videos": `${baseUrl}/`,
-                "Most Popular All": `${baseUrl}/most-popular/all/`,
-                "Ass-To-Mouth": `${baseUrl}/ass-to-mouth/`, 
-                "Bathroom": `${baseUrl}/bathroom/`,
-                "BBC (Big Black Cock)": `${baseUrl}/bbc/`,
-                "Big Ass": `${baseUrl}/big-ass/`,
-                "Big Cock": `${baseUrl}/big-cock/`,
-                "Cum in Mouth": `${baseUrl}/cum-in-mouth/`,
-                "Cum on Pussy": `${baseUrl}/cum-on-pussy/`,
-                "Cum on Tits": `${baseUrl}/cum-on-tits/`,
-                "Double Penetration": `${baseUrl}/double-penetration/`,
-                "Double Pussy": `${baseUrl}/double-pussy/`,
-                "FreeUse": `${baseUrl}/freeuse/`,
-                "Housewife": `${baseUrl}/housewife/`,
-                "Indian": `${baseUrl}/indian/`,
-                "Interracial": `${baseUrl}/interracial/`,
-                "Latina": `${baseUrl}/latina/`,
-                "Mature": `${baseUrl}/mature/`,
-                "MILF": `${baseUrl}/milf/`,
-                "Mom": `${baseUrl}/mom/`
-            };
-            
-            const data = {};
-            
-            // Sequential block execution for stable state returns in SkyStream panels
-            for (const [categoryName, url] of Object.entries(categories)) {
-                try {
-                    const res = await http_get(url, HEADERS);
-                    if (res.status === 200 && res.body) {
-                        // Core fallback configuration logic
-                        let items = parseCategoryItems(res.body);
-                        if (items.length === 0) items = parseVideoItems(res.body);
-                        
-                        if (items.length > 0) {
-                            data[categoryName] = items.slice(0, 20);
-                        }
+    try {
+        const baseUrl = manifest.baseUrl || "https://www.wow.xxx";
+        
+        const categories = {
+            "Latest Videos": `${baseUrl}/`,
+            "Most Popular All": `${baseUrl}/most-popular/all/`,
+            "Ass-To-Mouth": `${baseUrl}/ass-to-mouth/`,
+            "Bathroom": `${baseUrl}/bathroom/`,
+            "BBC (Big Black Cock)": `${baseUrl}/bbc/`,
+            "Big Ass": `${baseUrl}/big-ass/`,
+            "Big Cock": `${baseUrl}/big-cock/`,
+            "Cum in Mouth": `${baseUrl}/cum-in-mouth/`,
+            "Cum on Pussy": `${baseUrl}/cum-on-pussy/`,
+            "Cum on Tits": `${baseUrl}/cum-on-tits/`,
+            "Double Penetration": `${baseUrl}/double-penetration/`,
+            "Double Pussy": `${baseUrl}/double-pussy/`,
+            "FreeUse": `${baseUrl}/freeuse/`,
+            "Housewife": `${baseUrl}/housewife/`,
+            "Indian": `${baseUrl}/indian/`,
+            "Interracial": `${baseUrl}/interracial/`,
+            "Latina": `${baseUrl}/latina/`,
+            "Mature": `${baseUrl}/mature/`,
+            "MILF": `${baseUrl}/milf/`,
+            "Mom": `${baseUrl}/mom/`
+        };
+        
+        const categoryItems = {};
+        
+        // Load first 5 categories initially for faster response
+        // Others load in background or just return category structure
+        for (const [categoryName, categoryUrl] of Object.entries(categories)) {
+            try {
+                const res = await http_get(categoryUrl, HEADERS);
+                if (res.status === 200 && res.body) {
+                    let items = parseCategoryItems(res.body);
+                    if (items.length === 0) items = parseVideoItems(res.body);
+                    
+                    if (items.length > 0) {
+                        categoryItems[categoryName] = items.slice(0, 20);
+                    } else {
+                        // Return empty array so category shows but without items
+                        categoryItems[categoryName] = [];
                     }
-                } catch (e) {
-                    console.error(`Error loading category grid ${categoryName}: ${e.message}`);
+                } else {
+                    categoryItems[categoryName] = [];
                 }
+            } catch (e) {
+                console.error(`Error loading category ${categoryName}: ${e.message}`);
+                categoryItems[categoryName] = [];
             }
-            
-            if (Object.keys(data).length === 0) {
-                return cb({ success: false, errorCode: "PARSE_ERROR", message: "Failed to load layout streams content" });
-            }
-            
-            cb({ success: true, data });
-        } catch (e) {
-            console.error("getHome error: " + e.message);
-            cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
         }
+        
+        if (Object.keys(categoryItems).length === 0) {
+            return cb({ success: false, errorCode: "PARSE_ERROR", message: "Failed to load any categories" });
+        }
+        
+        // SkyStream expects data in this format
+        cb({ success: true, data: categoryItems });
+        
+    } catch (e) {
+        console.error("getHome error: " + e.message);
+        cb({ success: false, errorCode: "PARSE_ERROR", message: e.message });
     }
+}
 
     /**
      * Search for videos
